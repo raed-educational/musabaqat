@@ -44,3 +44,10 @@ GitHub Pages: push the folder to a repo branch and enable Pages; all paths are r
 
 ## Tests
 `cd tests && node smoke.mjs` (playwright-core + Chrome; serves from http://localhost:8765). Screenshots go to `screenshots/`.
+
+
+## ملفات اللاعبين والمسابقات أونلاين
+- **ملفي** (`#/profile`): اسم ورمز، إحصاءات لكل قسم، إنجازات، سجل آخر الألعاب، وعدة لاعبين على الجهاز نفسه. الملف محفوظ في المتصفح، ويُنقل إلى جهاز آخر برمز نصي أو ملف JSON.
+- **أونلاين** (`#/online`): ينشئ المضيف غرفة برمز من 5 خانات ورابط وQR، وينضم الآخرون من جوالاتهم دون حد لعدد اللاعبين. الأسئلة والمؤقت والنقاط يديرها جهاز المضيف.
+  - الربط: WebRTC مباشر عبر خادم PeerJS المجاني، ومع تعذّره يُستخدم تلقائيًا وسيط MQTT عام مجاني عبر WebSocket آمن (shiftr.io / EMQX / HiveMQ).
+  - يجب أن تبقى صفحة المضيف مفتوحة طوال المسابقة.

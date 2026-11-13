@@ -25,7 +25,8 @@
     view.appendChild(h('section', { class: 'hero' },
       h('div', { class: 'hero-text' }, h('h1', null, 'منصة ', h('span', { class: 'brand' }, 'المسابقات العلمية')), h('p', null, 'ألعاب ومسابقات في القرآن وعلومه، والحديث الصحيح، والعقيدة، والفقه وأصوله، واللغة، والسيرة، والتراجم، وتاريخ المملكة، وكرة القدم — مع ذكر المصدر لكل سؤال.'),
         h('div', { class: 'stats' }, h('div', null, h('b', null, fmt(total)), h('span', null, 'سؤال')), h('div', null, h('b', null, fmt(GAMES.length)), h('span', null, 'لعبة')), h('div', null, h('b', null, toAr(Bank.cats.length)), h('span', null, 'قسمًا')), h('div', null, h('b', null, fmt(ver)), h('span', null, 'سؤال موثّق آليًا'))),
-        h('div', { class: 'player-row' }, h('label', null, '👤 اسم اللاعب'), nameIn),
+        h('div', { class: 'player-row' }, h('a', { class: 'pf-mini', href: '#/profile', title: 'ملفي' }, W.QP.Player.avatar ? W.QP.Player.avatar() : '👤'), h('label', null, 'اسم اللاعب'), nameIn),
+        h('div', { class: 'row' }, h('a', { class: 'btn primary big', id: 'onlineHome', href: '#/online' }, '📡 مسابقة أونلاين مع أصدقائك'), h('a', { class: 'btn ghost big', href: '#/profile' }, '👤 ملفي وإنجازاتي')),
         h('div', { class: 'row' }, h('a', { class: 'btn primary big', href: '#/play/daily' }, '📅 تحدي اليوم'), h('a', { class: 'btn big', href: '#/play/' + encodeURIComponent('wheel-mix-عجلة الأقسام') }, '🎡 عجلة الأقسام'), h('a', { class: 'btn ghost big', href: '#/games' }, '🎮 كل الألعاب'))),
       h('div', { class: 'hero-art', 'aria-hidden': 'true' }, '🏆')));
     const grid = h('div', { class: 'cat-grid' });
@@ -104,6 +105,8 @@
     let rank = null;
     if (!res.multi && !res.study) { rank = Board.add({ game: game.id, title: game.title, player: name, score: Math.round(st.score), correct: st.correct, total: st.log.length, money: !!res.money }); }
     if (res.multi) res.multi.forEach(p => Board.add({ game: game.id, title: game.title, player: p.name, score: Math.round(p.score), correct: p.correct, total: st.log.length }));
+    let earned = null;
+    if (!res.multi && !res.study && W.QP.Profiles) earned = W.QP.Profiles.record({ game: game.id, title: game.title, score: st.score, log: st.log, best: st.best });
     if (game.rules.daily) { const d = W.QP.LS.get('daily', {}); d[W.QP.todayKey()] = st.score; W.QP.LS.set('daily', d); }
     const pct = st.log.length ? Math.round(100 * st.correct / st.log.length) : 0;
     if (pct >= 70) Sound.win();
@@ -113,6 +116,7 @@
       h('div', { class: 'row center' }, h('a', { class: 'btn primary', href: '#/play/' + encodeURIComponent(game.id) + '?r=' + Date.now() }, '🔁 العب مجددًا'), h('a', { class: 'btn', href: '#/board?game=' + encodeURIComponent(game.id) }, '🏅 لوحة الصدارة'), h('button', { class: 'btn ghost', onclick: share }, '📤 مشاركة النتيجة'), h('a', { class: 'btn ghost', href: '#/' }, '🏠 الرئيسية')));
     function share() { const t = `حصلت على ${Math.round(st.score)} نقطة في «${game.title}» (${st.correct}/${st.log.length}) على منصة المسابقات العلمية! ${location.href.split('#')[0]}#/play/${encodeURIComponent(game.id)}`; if (navigator.share) navigator.share({ text: t }).catch(() => {}); else { navigator.clipboard && navigator.clipboard.writeText(t); alert('تم نسخ النتيجة'); } }
     view.appendChild(head);
+    if (earned && earned.newBadges.length) view.appendChild(W.QP.badgeNote(earned.newBadges));
     view.appendChild(h('h2', { class: 'section-title' }, '📝 مراجعة الأسئلة'));
     const rev = h('div', { class: 'review' });
     st.log.forEach((l, k) => rev.appendChild(h('details', { class: 'rev ' + (l.res.correct ? 'good' : 'bad') }, h('summary', null, (l.res.correct ? '✔ ' : '✘ ') + toAr(k + 1) + '. ' + l.q.question + (l.player ? ' — ' + l.player : '')),
@@ -159,7 +163,9 @@
     const { parts, params } = parseHash();
     const [p0, p1] = parts;
     if (!p0) home(); else if (p0 === 'cat') category(p1); else if (p0 === 'games') catalog(params); else if (p0 === 'play') play(p1, params);
-    else if (p0 === 'board') board(params); else if (p0 === 'about') about(); else home();
+    else if (p0 === 'board') board(params); else if (p0 === 'about') about();
+    else if (p0 === 'profile') { setActive('profile'); W.QP.profilePage(view); }
+    else if (p0 === 'online') { setActive('online'); W.QP.onlinePage(view, parts, r => { running = r; }); } else home();
   }
   W.addEventListener('hashchange', route);
   const snd = document.getElementById('soundBtn');
