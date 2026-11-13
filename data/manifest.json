@@ -1,0 +1,173 @@
+{
+ "categories": {
+  "quran": {
+   "count": 4648,
+   "verified": 4616,
+   "types": {
+    "mcq": 4101,
+    "tf": 103,
+    "who": 114,
+    "fill": 195,
+    "order": 70,
+    "match": 65
+   },
+   "levels": {
+    "primary": 4616,
+    "none": 32
+   }
+  },
+  "aqeedah": {
+   "count": 2537,
+   "verified": 2508,
+   "types": {
+    "mcq": 2530,
+    "order": 2,
+    "tf": 4,
+    "match": 1
+   },
+   "levels": {
+    "primary": 2508,
+    "none": 29
+   }
+  },
+  "fiqh": {
+   "count": 5477,
+   "verified": 5457,
+   "types": {
+    "mcq": 5474,
+    "match": 1,
+    "tf": 2
+   },
+   "levels": {
+    "none": 20,
+    "primary": 5457
+   }
+  },
+  "usul": {
+   "count": 975,
+   "verified": 942,
+   "types": {
+    "mcq": 972,
+    "match": 1,
+    "tf": 2
+   },
+   "levels": {
+    "none": 33,
+    "primary": 56,
+    "reference": 886
+   }
+  },
+  "lugha": {
+   "count": 3611,
+   "verified": 3544,
+   "types": {
+    "mcq": 3609,
+    "fill": 2
+   },
+   "levels": {
+    "none": 67,
+    "primary": 1,
+    "reference": 3543
+   }
+  },
+  "hadith": {
+   "count": 4014,
+   "verified": 3980,
+   "types": {
+    "mcq": 3975,
+    "tf": 1,
+    "fill": 38
+   },
+   "levels": {
+    "none": 34,
+    "primary": 3980
+   }
+  },
+  "sira": {
+   "count": 1010,
+   "verified": 976,
+   "types": {
+    "mcq": 1001,
+    "order": 6,
+    "match": 1,
+    "who": 2
+   },
+   "levels": {
+    "none": 34,
+    "primary": 768,
+    "reference": 208
+   }
+  },
+  "sahaba": {
+   "count": 1852,
+   "verified": 1833,
+   "types": {
+    "order": 1,
+    "mcq": 1848,
+    "who": 3
+   },
+   "levels": {
+    "none": 19,
+    "primary": 365,
+    "reference": 1468
+   }
+  },
+  "tabieen": {
+   "count": 1455,
+   "verified": 1431,
+   "types": {
+    "mcq": 1453,
+    "who": 2
+   },
+   "levels": {
+    "none": 24,
+    "primary": 1282,
+    "reference": 149
+   }
+  },
+  "ulama": {
+   "count": 3582,
+   "verified": 3547,
+   "types": {
+    "order": 1,
+    "mcq": 3577,
+    "match": 1,
+    "who": 3
+   },
+   "levels": {
+    "none": 35,
+    "reference": 3547
+   }
+  },
+  "saudi": {
+   "count": 3864,
+   "verified": 3815,
+   "types": {
+    "mcq": 3858,
+    "order": 4,
+    "match": 1,
+    "who": 1
+   },
+   "levels": {
+    "none": 49,
+    "reference": 3815
+   }
+  },
+  "football": {
+   "count": 5884,
+   "verified": 5833,
+   "types": {
+    "mcq": 5879,
+    "order": 1,
+    "match": 2,
+    "who": 2
+   },
+   "levels": {
+    "none": 51,
+    "reference": 5833
+   }
+  }
+ },
+ "total": 38909,
+ "verified": 38482
+}
