@@ -17,16 +17,16 @@
    }
   },
   "aqeedah": {
-   "count": 2537,
-   "verified": 2508,
+   "count": 3125,
+   "verified": 3096,
    "types": {
-    "mcq": 2530,
+    "mcq": 3118,
     "order": 2,
     "tf": 4,
     "match": 1
    },
    "levels": {
-    "primary": 2508,
+    "primary": 3096,
     "none": 29
    }
   },
@@ -44,16 +44,16 @@
    }
   },
   "usul": {
-   "count": 975,
-   "verified": 942,
+   "count": 1621,
+   "verified": 1588,
    "types": {
-    "mcq": 972,
+    "mcq": 1618,
     "match": 1,
     "tf": 2
    },
    "levels": {
     "none": 33,
-    "primary": 56,
+    "primary": 702,
     "reference": 886
    }
   },
@@ -71,58 +71,59 @@
    }
   },
   "hadith": {
-   "count": 4014,
-   "verified": 3980,
+   "count": 3683,
+   "verified": 3649,
    "types": {
-    "mcq": 3975,
+    "mcq": 3644,
     "tf": 1,
     "fill": 38
    },
    "levels": {
     "none": 34,
-    "primary": 3980
+    "primary": 3649
    }
   },
   "sira": {
-   "count": 1010,
-   "verified": 976,
+   "count": 3036,
+   "verified": 3002,
    "types": {
-    "mcq": 1001,
+    "mcq": 3027,
     "order": 6,
     "match": 1,
     "who": 2
    },
    "levels": {
     "none": 34,
-    "primary": 768,
+    "primary": 2794,
     "reference": 208
    }
   },
   "sahaba": {
-   "count": 1852,
-   "verified": 1833,
+   "count": 3000,
+   "verified": 2981,
    "types": {
     "order": 1,
-    "mcq": 1848,
-    "who": 3
+    "mcq": 2621,
+    "who": 3,
+    "tf": 375
    },
    "levels": {
     "none": 19,
-    "primary": 365,
-    "reference": 1468
+    "primary": 696,
+    "reference": 2285
    }
   },
   "tabieen": {
-   "count": 1455,
-   "verified": 1431,
+   "count": 5863,
+   "verified": 5839,
    "types": {
-    "mcq": 1453,
+    "mcq": 5861,
     "who": 2
    },
    "levels": {
     "none": 24,
     "primary": 1282,
-    "reference": 149
+    "reference": 4557
    }
   },
   "ulama": {
@@ -168,6 +169,6 @@
    }
   }
  },
- "total": 38909,
- "verified": 38482
+ "total": 47394,
+ "verified": 46967
 }
