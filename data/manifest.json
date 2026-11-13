@@ -44,16 +44,16 @@
    }
   },
   "usul": {
-   "count": 1621,
-   "verified": 1588,
+   "count": 3217,
+   "verified": 3184,
    "types": {
-    "mcq": 1618,
+    "mcq": 3214,
     "match": 1,
     "tf": 2
    },
    "levels": {
     "none": 33,
-    "primary": 702,
+    "primary": 2298,
     "reference": 886
    }
   },
@@ -169,6 +169,6 @@
    }
   }
  },
- "total": 47394,
- "verified": 46967
+ "total": 48990,
+ "verified": 48563
 }
