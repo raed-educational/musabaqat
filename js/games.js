@@ -30,6 +30,8 @@
     study:    { name: 'بطاقات المراجعة', icon: '🗂️', engine: 'study', desc: 'تعلّم بالبطاقات مع الشرح والمصدر.', types: ALLQ, rules: { count: 30 } },
     wheel:    { name: 'عجلة الأقسام', icon: '🎡', engine: 'quiz', desc: 'العجلة تختار القسم قبل كل سؤال!', types: CHOICE, rules: { count: 12, perQ: 20, wheel: true, speedBonus: true } },
     verified: { name: 'تحدي الموثّق', icon: '🛡️', engine: 'quiz', desc: 'أسئلة جرى التحقق منها آليًا مقابل نص المصدر فقط.', types: ALLQ, verifiedOnly: true, rules: { count: 12, perQ: 25, speedBonus: true } },
+    seenjeem: { name: 'سين جيم', icon: '🟧', engine: 'seenjeem', desc: 'لوحة ٦ فئات و٣٦ سؤالًا (٢٠٠/٤٠٠/٦٠٠) بين فريقين، مع وسائل المساعدة: الحفرة، جاوب جوابين، اتصال بصديق، استريح، الفخ.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
+    huroof: { name: 'حروف', icon: '🐝', engine: 'huroof', desc: 'خلية الحروف السداسية: الأخضر يصل اليمين باليسار والبرتقالي يصل الأعلى بالأسفل، وكل حرف وراه سؤال جوابه يبدأ به.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
     championship: { name: 'البطولة الكبرى', icon: '🏆', engine: 'championship', desc: 'خمس جولات حماسية تشمل كل الأقسام: إحماء، برق، عجلة، مهارة، والجولة الذهبية بنقاط مضاعفة.', types: ALLQ, rules: { championship: true } }
   };
 
@@ -72,6 +74,8 @@
   // ---- mixed / cross-category
   const ALL = Bank.cats.map(c => c.id);
   add(Object.assign(make('championship', ALL, { key: 'grand', title: 'البطولة الكبرى' }), { id: 'championship', icon: '🏆', featured: true, desc: 'خمس جولات حماسية تغطي كل الأقسام الاثني عشر: إحماء، برق، عجلة الأقسام، المهارة، والجولة الذهبية.' }));
+  add(Object.assign(make('seenjeem', ALL, { key: 'seenjeem', title: 'سين جيم' }), { id: 'seenjeem', featured: true }));
+  add(Object.assign(make('huroof', ALL, { key: 'huroof', title: 'حروف' }), { id: 'huroof', featured: true }));
   [['classic', ALL, 'الشامل'], ['blitz', ALL, 'الخاطف الشامل'], ['survival', ALL, 'النجاة الشامل'], ['ladder', ALL, 'المليون الشامل'],
    ['teams', ALL, 'مسابقة الفرق الكبرى'], ['duel', ALL, 'تحدي الثنائي الشامل'], ['buzzer', ALL, 'الجرس الشامل'], ['wheel', ALL, 'عجلة الأقسام'],
    ['who', ALL, 'من أنا؟ الشامل'], ['order', ALL, 'ترتيب شامل'], ['match', ALL, 'توصيل شامل'], ['verified', ALL, 'تحدي الموثّق الشامل'],

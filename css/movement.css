@@ -1,0 +1,96 @@
+/* movement.css — الألعاب الحركية (Theme B: teal + orange) */
+.mv-banner{display:flex;gap:22px;align-items:center;background:linear-gradient(125deg,#0a3d42 0%,#123a28 45%,#3a2410 100%);border:2px solid var(--teal);border-radius:24px;padding:22px 26px;margin-bottom:20px;box-shadow:0 0 0 1px rgba(95,208,214,.25),0 16px 40px rgba(0,0,0,.45);position:relative;overflow:hidden}
+.mv-banner::before{content:"";position:absolute;inset:-30% auto auto -10%;width:240px;height:240px;background:radial-gradient(circle,rgba(95,208,214,.3),transparent 70%);pointer-events:none}
+.mv-banner-icon{font-size:72px;line-height:1;flex:none;filter:drop-shadow(0 8px 16px rgba(0,0,0,.4))}
+.mv-banner-body{position:relative;flex:1;min-width:0}.mv-banner-body h2{margin:0 0 4px;font-size:36px;color:var(--gold);line-height:1.25}
+.mv-banner-body p{margin:0 0 10px;color:#e8f4f3}.mv-banner .btn{margin-top:6px}
+.mv-head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.mv-head h1{margin:0;font-size:34px;line-height:1.3}.mv-lead{color:#e8f4f3;font-size:18px;margin:6px 0 0;max-width:720px}
+.mv-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mv-search{min-width:min(100%,280px);min-height:44px;font-size:16px}
+.mv-filters{margin-top:8px}
+.mv-frow{align-items:flex-start}
+.mv-filters .chip{min-height:44px}
+.mv-count{font-weight:800;color:var(--gold);margin:8px 0 12px;font-size:18px}
+.mv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.mv-card{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--teal);border-radius:16px;padding:14px;transition:.15s;min-width:0;color:inherit}
+.mv-card:hover{transform:translateY(-2px);background:var(--card2);border-color:var(--pri)}
+.mv-card-icon{font-size:40px;line-height:1;flex:none}
+.mv-card-title{font-weight:800;font-size:20px;line-height:1.35}
+.mv-card-desc{color:var(--muted);font-size:14px;line-height:1.6;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mv-card .chips{margin-top:8px}
+.mv-empty{grid-column:1/-1;padding:28px 12px}
+
+.mv-toolbar{margin-bottom:14px;gap:10px}
+.mv-hero{background:linear-gradient(135deg,#0b4a50,#2a2410);border:1px solid var(--line);border-radius:24px;padding:26px 28px;text-align:center;box-shadow:var(--sh);margin-bottom:18px}
+.mv-hero-icon{font-size:84px;line-height:1;margin-bottom:6px}
+.mv-hero h1{margin:.1em 0 .2em;font-size:40px;color:var(--gold)}
+.mv-goal{font-size:20px;color:#e8f4f3;max-width:820px;margin:0 auto 10px}
+.mv-hero .chips{justify-content:center}
+.mv-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:14px 0 18px}
+.mv-meta div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.mv-meta b{display:block;color:var(--teal);font-size:13px;margin-bottom:2px}
+.mv-sec{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;margin:0 0 14px;box-shadow:var(--sh)}
+.mv-sec h2{margin:0 0 10px;font-size:24px;color:var(--gold)}
+.mv-steps{margin:0;padding:0 22px 0 0;font-size:18px}
+.mv-steps li{margin:0 0 10px;padding-inline-start:4px;line-height:1.75}
+.mv-sec.safety{border-color:rgba(255,122,107,.45)}
+.mv-sec.quiz{border-color:rgba(245,180,90,.55);background:linear-gradient(180deg,rgba(232,150,46,.12),var(--card))}
+
+.mv-runner{background:var(--card2);border:2px solid var(--gold);border-radius:20px;padding:18px 18px 16px;margin:18px 0 8px;position:sticky;bottom:8px;z-index:6;box-shadow:0 12px 36px rgba(0,0,0,.5)}
+.mv-runner h2{margin:0 0 10px;font-size:22px;color:var(--gold);text-align:center}
+.mv-timer-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.mv-time{font-size:72px;font-weight:800;line-height:1;color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:1px}
+.mv-time.warn{color:var(--bad);animation:mvPulse .6s ease-in-out infinite}
+@keyframes mvPulse{50%{transform:scale(1.06)}}
+.mv-tbar{width:100%;max-width:520px;height:16px;background:var(--bg2);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.mv-tbar .tbar-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--pri),#5fd0d6);transition:width .2s linear}
+.mv-tbar .tbar-fill.warn{background:linear-gradient(90deg,var(--bad),#f5b45a)}
+.mv-presets,.mv-timer-btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.mv-presets .chip,.mv-timer-btns .btn{min-height:44px}
+.mv-presets .chip.on{background:var(--pri);border-color:transparent;color:#1a1205}
+.mv-teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px}
+.mv-team{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:10px 12px;text-align:center}
+.mv-team .inp{text-align:center;font-weight:800;min-height:44px;margin-bottom:6px}
+.mv-score{font-size:48px;font-weight:800;color:var(--gold);line-height:1.1;margin:2px 0 8px}
+.mv-score-btns{display:flex;gap:8px;justify-content:center}
+.mv-score-btns .btn{min-width:48px;min-height:44px;font-size:22px}
+.mv-runner-tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+
+@media (max-width:760px){
+  .mv-banner{flex-direction:column;text-align:center;padding:18px;gap:8px}
+  .mv-banner-icon{font-size:56px}.mv-banner-body h2{font-size:28px}.mv-banner .chips{justify-content:center}
+  .mv-head{flex-direction:column}.mv-head h1{font-size:28px}.mv-search{width:100%}
+  .mv-grid{grid-template-columns:1fr}
+  .mv-hero{padding:18px}.mv-hero h1{font-size:30px}.mv-hero-icon{font-size:64px}.mv-goal{font-size:17px}
+  .mv-time{font-size:56px}.mv-score{font-size:40px}
+  .mv-runner{padding:14px;bottom:4px}
+  .mv-steps{font-size:17px;padding-inline-start:20px}
+}
+@media (max-width:600px){
+  .mv-banner-body h2{font-size:24px}.mv-banner-body p{font-size:15px}
+  .mv-meta{grid-template-columns:1fr 1fr}
+}
+
+body.proj .mv-banner-body h2{font-size:52px}body.proj .mv-banner-icon{font-size:96px}body.proj .mv-banner p{font-size:24px}
+body.proj .mv-head h1{font-size:48px}body.proj .mv-lead{font-size:26px}
+body.proj .mv-card-title{font-size:26px}body.proj .mv-card-desc{font-size:18px}body.proj .mv-card-icon{font-size:52px}
+body.proj .mv-hero h1{font-size:58px}body.proj .mv-hero-icon{font-size:120px}body.proj .mv-goal{font-size:30px}
+body.proj .mv-sec h2{font-size:34px}body.proj .mv-steps,body.proj .mv-sec p{font-size:28px;line-height:1.7}
+body.proj .mv-meta b{font-size:18px}body.proj .mv-meta div{font-size:24px}
+body.proj .mv-time{font-size:110px}body.proj .mv-score{font-size:72px}
+body.proj .mv-runner h2{font-size:32px}
+body.proj .mv-count{font-size:26px}
+
+@media print{
+  .topbar,.footer,.top-tools,.no-print,.mv-runner,.nav{display:none!important}
+  body,body.proj{background:#fff!important;color:#111!important;font-size:16px}
+  .container{max-width:none;padding:0}
+  .mv-hero,.mv-sec,.mv-meta div{background:#fff;border:1px solid #ccc;box-shadow:none;color:#111}
+  .mv-hero h1,.mv-sec h2,.mv-goal,.mv-meta b{color:#06272a}
+  .chip{border-color:#999;color:#111;background:#f4f4f4}
+  a{color:#111}
+  .mv-steps{font-size:16px;line-height:1.6}
+  .mv-detail{page-break-inside:auto}
+  .mv-sec{page-break-inside:avoid}
+}

@@ -31,6 +31,17 @@
         h('div', { class: 'chips' },
           h('span', { class: 'chip' }, '🌅 إحماء'), h('span', { class: 'chip' }, '⚡ برق'), h('span', { class: 'chip' }, '🎡 عجلة'), h('span', { class: 'chip' }, '🧩 مهارة'), h('span', { class: 'chip' }, '🥇 الجولة الذهبية')),
         h('span', { class: 'btn primary big' }, '🔥 ابدأ البطولة'))));
+    view.appendChild(h('div', { class: 'party-row' },
+      h('a', { class: 'party-banner sj', id: 'homeSeenJeem', href: '#/play/seenjeem' },
+        h('div', { class: 'party-icon' }, '🟧'),
+        h('div', { class: 'party-body' }, h('div', { class: 'champ-kicker' }, 'لعبة الفرق الشهيرة'), h('h2', null, 'سين جيم'),
+          h('p', null, '٦ فئات و٣٦ سؤالًا (٢٠٠ / ٤٠٠ / ٦٠٠) بين فريقين، مع الحفرة وجاوب جوابين واتصال بصديق واستريح والفخ.'),
+          h('span', { class: 'btn primary' }, '▶ العب سين جيم'))),
+      h('a', { class: 'party-banner hf', id: 'homeHuroof', href: '#/play/huroof' },
+        h('div', { class: 'party-icon' }, '🐝'),
+        h('div', { class: 'party-body' }, h('div', { class: 'champ-kicker' }, 'خلية الحروف'), h('h2', null, 'حروف'),
+          h('p', null, 'لوحة سداسية من ٢٥ حرفًا: الأخضر يصل اليمين باليسار، والبرتقالي يصل الأعلى بالأسفل. كل حرف وراه سؤال جوابه يبدأ به.'),
+          h('span', { class: 'btn primary' }, '▶ العب حروف')))));
     view.appendChild(h('section', { class: 'hero' },
       h('div', { class: 'hero-text' }, h('h1', null, 'منصة ', h('span', { class: 'brand' }, 'المسابقات العلمية')), h('p', null, 'ألعاب ومسابقات في القرآن وعلومه، والحديث الصحيح، والعقيدة، والفقه وأصوله، واللغة، والسيرة، والتراجم، وتاريخ المملكة، وكرة القدم — مع ذكر المصدر لكل سؤال.'),
         h('div', { class: 'stats' }, h('div', null, h('b', null, fmt(total)), h('span', null, 'سؤال')), h('div', null, h('b', null, fmt(GAMES.length)), h('span', null, 'لعبة')), h('div', null, h('b', null, toAr(Bank.cats.length)), h('span', null, 'قسمًا')), h('div', null, h('b', null, fmt(ver)), h('span', null, 'سؤال موثّق آليًا'))),
@@ -106,7 +117,7 @@
         const need = g.engine === 'ladder' ? 15 : (g.engine === 'championship' ? 12 : 6);
         return Bank.count(f) >= need;
       });
-      grid.innerHTML = ''; list.forEach(g => grid.appendChild(gameCard(g))); count.textContent = fmt(list.length) + ' لعبة';
+      grid.innerHTML = ''; list.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)); list.forEach(g => grid.appendChild(gameCard(g))); count.textContent = fmt(list.length) + ' لعبة';
       let note = grid.parentNode && grid.parentNode.querySelector('.filter-note');
       if (note) note.remove();
       if (!list.length) grid.appendChild(h('p', { class: 'filter-note' }, 'تنبيه: لا توجد ألعاب كافية لهذا الاختيار، جرّب «الكل» في الصعوبة أو المرحلة.'));
@@ -123,6 +134,13 @@
     const g = W.QP.game(id); if (!g) { view.appendChild(h('p', null, 'اللعبة غير موجودة. ')); view.appendChild(h('a', { href: '#/games' }, 'دليل الألعاب')); return; }
     setActive('games');
     if (g.rules.daily) { const d = W.QP.LS.get('daily', {}); if (d[W.QP.todayKey()]) { view.appendChild(h('div', { class: 'card center' }, h('h2', null, '📅 أنهيت تحدي اليوم'), h('p', null, 'نتيجتك اليوم: ' + fmt(Math.round(d[W.QP.todayKey()])) + ' نقطة. عد غدًا لتحدٍّ جديد!'), h('a', { class: 'btn primary', href: '#/board?game=daily' }, 'لوحة الصدارة'))); return; } }
+    if (g.engine === 'seenjeem' || g.engine === 'huroof') {
+      const root = h('div', { class: 'game-root party-root ' + g.engine + '-root' });
+      view.appendChild(root);
+      root.appendChild(h('p', { class: 'center muted' }, '⏳ جارٍ التحميل…'));
+      setTimeout(() => { root.innerHTML = ''; running = ENGINES[g.engine](g, root, W.QP.getQFilters ? W.QP.getQFilters() : {}, results) || null; }, 0);
+      return;
+    }
     if (g.engine === 'championship') {
       const root = h('div', { class: 'game-root champ-root' });
       view.appendChild(root);
@@ -168,10 +186,11 @@
     if (!res.multi && !res.study) { rank = Board.add({ game: game.id, title: game.title, player: name, score: Math.round(st.score), correct: st.correct, total: st.log.length, money: !!res.money }); }
     if (res.multi) res.multi.forEach(p => Board.add({ game: game.id, title: game.title, player: p.name, score: Math.round(p.score), correct: p.correct, total: st.log.length }));
     let earned = null;
-    const recScore = rec => res.championship ? Math.min(5000, Math.max(0, Math.round(rec))) : rec;
+    const big = res.championship || res.party;
+    const recScore = rec => big ? Math.min(5000, Math.max(0, Math.round(rec))) : rec;
     if (!res.multi && !res.study && W.QP.Profiles) earned = W.QP.Profiles.record({ game: game.id, title: game.title, score: recScore(st.score), log: st.log, best: st.best });
-    if (res.multi && res.championship && !res.study && W.QP.Profiles) {
-      const mine = res.multi.find(p => p.name === name) || res.multi[0];
+    if (res.multi && big && !res.study && W.QP.Profiles) {
+      const mine = res.multi.find(p => p.name === (res.hostName || name)) || res.multi.find(p => p.name === name) || res.multi[0];
       if (mine) {
         const log = st.log.filter(l => !l.player || l.player === mine.name);
         earned = W.QP.Profiles.record({ game: game.id, title: game.title, score: recScore(mine.score), log, best: st.best || mine.best });
@@ -179,11 +198,12 @@
     }
     if (game.rules.daily) { const d = W.QP.LS.get('daily', {}); d[W.QP.todayKey()] = st.score; W.QP.LS.set('daily', d); }
     const pct = st.log.length ? Math.round(100 * st.correct / st.log.length) : 0;
-    if (res.championship && Sound.fanfare) Sound.fanfare(); else if (pct >= 70) Sound.win();
-    if (res.championship && W.QP.confetti) setTimeout(() => W.QP.confetti(view), 30);
-    const head = h('div', { class: 'card result' + (res.championship ? ' champ-result' : '') }, h('div', { class: 'intro-icon' }, res.championship ? '🏆' : pct >= 80 ? '🏆' : pct >= 50 ? '🎉' : '💪'), h('h1', null, res.money ? 'ربحت ' + fmt(st.score) + ' ريال افتراضي!' : res.study ? 'انتهت جلسة المراجعة' : res.championship ? 'نتيجة البطولة: ' + fmt(Math.round(st.score)) + ' نقطة' : 'النتيجة: ' + fmt(Math.round(st.score)) + ' نقطة'),
-      res.championship && Math.round(st.score) > 5000 ? h('p', { class: 'muted small' }, 'تُحتسب في لوحة الصدارة العامة حتى ٥٠٠٠ نقطة لهذه البطولة.') : null,
-      res.multi ? h('div', { class: 'podium champ-podium' }, res.multi.slice().sort((a, b) => b.score - a.score).map((p, k) => h('div', { class: 'pod p' + k }, h('div', null, ['🥇', '🥈', '🥉'][k] || '🎖'), h('b', null, p.name), h('span', null, fmt(Math.round(p.score)))))) : res.championship ? h('div', { class: 'podium champ-podium' }, h('div', { class: 'pod p0' }, h('div', null, '🥇'), h('b', null, name), h('span', null, fmt(Math.round(st.score))))) : null,
+    if (big && Sound.fanfare) Sound.fanfare(); else if (pct >= 70) Sound.win();
+    if (big && W.QP.confetti) setTimeout(() => W.QP.confetti(view), 30);
+    const head = h('div', { class: 'card result' + (big ? ' champ-result' : '') }, h('div', { class: 'intro-icon' }, big ? '🏆' : pct >= 80 ? '🏆' : pct >= 50 ? '🎉' : '💪'), h('h1', null, res.money ? 'ربحت ' + fmt(st.score) + ' ريال افتراضي!' : res.study ? 'انتهت جلسة المراجعة' : res.party ? (res.winner ? '🏆 الفائز: ' + res.winner : '🤝 تعادل!') : res.championship ? 'نتيجة البطولة: ' + fmt(Math.round(st.score)) + ' نقطة' : 'النتيجة: ' + fmt(Math.round(st.score)) + ' نقطة'),
+      res.party && res.scoreLabel ? h('p', { class: 'muted small' }, 'النقاط: ' + res.scoreLabel) : null,
+      big && Math.round(st.score) > 5000 ? h('p', { class: 'muted small' }, 'تُحتسب في لوحة الصدارة العامة حتى ٥٠٠٠ نقطة لهذه اللعبة.') : null,
+      res.multi ? h('div', { class: 'podium champ-podium' }, (res.party ? res.multi.slice() : res.multi.slice().sort((a, b) => b.score - a.score)).map((p, k) => h('div', { class: 'pod p' + k }, h('div', null, ['🥇', '🥈', '🥉'][k] || '🎖'), h('b', null, p.name), h('span', null, fmt(Math.round(p.score)))))) : res.championship ? h('div', { class: 'podium champ-podium' }, h('div', { class: 'pod p0' }, h('div', null, '🥇'), h('b', null, name), h('span', null, fmt(Math.round(st.score))))) : null,
       h('div', { class: 'stats' }, h('div', null, h('b', null, toAr(st.correct)), h('span', null, 'صحيحة')), h('div', null, h('b', null, toAr(st.wrong)), h('span', null, 'خاطئة')), h('div', null, h('b', null, toAr(pct) + '٪'), h('span', null, 'الدقة')), st.best ? h('div', null, h('b', null, toAr(st.best)), h('span', null, 'أطول تتابع')) : null, rank != null ? h('div', null, h('b', null, '#' + toAr(rank + 1)), h('span', null, 'في الصدارة')) : null),
       h('div', { class: 'row center' }, h('a', { class: 'btn primary', href: '#/play/' + encodeURIComponent(game.id) + '?r=' + Date.now() }, '🔁 العب مجددًا'), h('a', { class: 'btn', href: '#/board?game=' + encodeURIComponent(game.id) }, '🏅 لوحة الصدارة'), h('button', { class: 'btn ghost', onclick: share }, '📤 مشاركة النتيجة'), h('a', { class: 'btn ghost', href: '#/' }, '🏠 الرئيسية')));
     function share() { const t = `حصلت على ${Math.round(st.score)} نقطة في «${game.title}» (${st.correct}/${st.log.length}) على منصة المسابقات العلمية! ${location.href.split('#')[0]}#/play/${encodeURIComponent(game.id)}`; if (navigator.share) navigator.share({ text: t }).catch(() => {}); else { navigator.clipboard && navigator.clipboard.writeText(t); alert('تم نسخ النتيجة'); } }
