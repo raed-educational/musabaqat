@@ -100,6 +100,13 @@
     const msg = h('div', { class: 'muted small' });
     const fileIn = h('input', { type: 'file', accept: '.json,application/json,text/plain', class: 'hidden', onchange: e => { const f = e.target.files[0]; if (!f) return; f.text().then(t => { codeBox.value = t; doImport(); }); } });
     function doImport() { try { const np = Profiles.importCode(codeBox.value); msg.textContent = '✔ تم استيراد ملف «' + np.name + '»'; setTimeout(rerender, 600); } catch (e) { msg.textContent = '✘ ' + e.message; } }
+    if (W.QP.GlobalLB) {
+      const G = W.QP.GlobalLB; const last = G.last();
+      const tg = h('input', { type: 'checkbox', id: 'lbToggle', checked: G.enabled(), onchange: e => { G.setEnabled(e.target.checked); lbMsg.textContent = e.target.checked ? '✔ ستظهر نتيجتك في اللوحة العامة' : '⏸ تم الإيقاف وحذف نتيجتك من اللوحة العامة'; } });
+      const lbMsg = h('span', { class: 'muted small' }, last && last.ok && last.ok.length ? 'آخر نشر: ' + new Date(last.t).toLocaleString('ar-SA') : '');
+      view.appendChild(h('div', { class: 'card lb-opt' }, h('label', { class: 'switch-row' }, tg, h('span', null, '🌍 أظهر اسمي ونتائجي في ', h('a', { href: '#/global' }, 'لوحة الصدارة العامة'))), lbMsg,
+        h('p', { class: 'muted small' }, 'يُنشر اسمك ورمزك ونقاطك فقط، دون أي بيانات أخرى.')));
+    }
     view.appendChild(h('h2', { class: 'section-title' }, '🔄 نقل ملفك إلى جهاز آخر'));
     view.appendChild(h('div', { class: 'card' },
       h('p', { class: 'muted' }, 'ملفك محفوظ في هذا المتصفح فقط. لنقله: انسخ الرمز أو نزّل الملف، ثم افتح المنصة في الجهاز الآخر واستورده من هذه الصفحة.'),

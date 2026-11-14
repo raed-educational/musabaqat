@@ -26,7 +26,7 @@
       h('div', { class: 'hero-text' }, h('h1', null, 'منصة ', h('span', { class: 'brand' }, 'المسابقات العلمية')), h('p', null, 'ألعاب ومسابقات في القرآن وعلومه، والحديث الصحيح، والعقيدة، والفقه وأصوله، واللغة، والسيرة، والتراجم، وتاريخ المملكة، وكرة القدم — مع ذكر المصدر لكل سؤال.'),
         h('div', { class: 'stats' }, h('div', null, h('b', null, fmt(total)), h('span', null, 'سؤال')), h('div', null, h('b', null, fmt(GAMES.length)), h('span', null, 'لعبة')), h('div', null, h('b', null, toAr(Bank.cats.length)), h('span', null, 'قسمًا')), h('div', null, h('b', null, fmt(ver)), h('span', null, 'سؤال موثّق آليًا'))),
         h('div', { class: 'player-row' }, h('a', { class: 'pf-mini', href: '#/profile', title: 'ملفي' }, W.QP.Player.avatar ? W.QP.Player.avatar() : '👤'), h('label', null, 'اسم اللاعب'), nameIn),
-        h('div', { class: 'row' }, h('a', { class: 'btn primary big', id: 'onlineHome', href: '#/online' }, '📡 مسابقة أونلاين مع أصدقائك'), h('a', { class: 'btn ghost big', href: '#/profile' }, '👤 ملفي وإنجازاتي')),
+        h('div', { class: 'row' }, h('a', { class: 'btn primary big', id: 'onlineHome', href: '#/online' }, '📡 مسابقة أونلاين مع أصدقائك'), h('a', { class: 'btn ghost big', href: '#/profile' }, '👤 ملفي وإنجازاتي'), h('a', { class: 'btn ghost big', id: 'globalHome', href: '#/global' }, '🌍 لوحة الصدارة العامة')),
         h('div', { class: 'row' }, h('a', { class: 'btn primary big', href: '#/play/daily' }, '📅 تحدي اليوم'), h('a', { class: 'btn big', href: '#/play/' + encodeURIComponent('wheel-mix-عجلة الأقسام') }, '🎡 عجلة الأقسام'), h('a', { class: 'btn ghost big', href: '#/games' }, '🎮 كل الألعاب'))),
       h('div', { class: 'hero-art', 'aria-hidden': 'true' }, '🏆')));
     const grid = h('div', { class: 'cat-grid' });
@@ -164,6 +164,7 @@
     const [p0, p1] = parts;
     if (!p0) home(); else if (p0 === 'cat') category(p1); else if (p0 === 'games') catalog(params); else if (p0 === 'play') play(p1, params);
     else if (p0 === 'board') board(params); else if (p0 === 'about') about();
+    else if (p0 === 'global') { setActive('global'); W.QP.globalPage(view, r => { running = r; }, params); }
     else if (p0 === 'profile') { setActive('profile'); W.QP.profilePage(view); }
     else if (p0 === 'online') { setActive('online'); W.QP.onlinePage(view, parts, r => { running = r; }); } else home();
   }

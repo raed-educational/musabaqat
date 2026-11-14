@@ -110,3 +110,5 @@ textarea.code{font-family:monospace;font-size:12px;direction:ltr;margin-top:10px
 @media (max-width:800px){.online-choice,.online-game{grid-template-columns:1fr}.room-code{font-size:40px}.room-share{justify-content:center;text-align:center}}
 @media (max-width:600px){.topbar{flex-wrap:wrap;gap:6px;padding:8px 10px}.nav{flex-wrap:nowrap;overflow-x:auto;width:100%;order:3;margin:0;scrollbar-width:none}.nav a{white-space:nowrap;padding:4px 10px}.logo{font-size:17px}.icon-btn{margin-inline-start:auto}}
 .lb-gap{text-align:center;color:var(--muted);line-height:1}
+.lb-tabs .chip.on{background:var(--pri);border-color:transparent}.global-board tr.me td{background:rgba(245,196,81,.15);font-weight:700}
+.switch-row{flex-direction:row;align-items:center;gap:10px;color:#fff;font-size:16px}.switch-row input{width:20px;height:20px}.lb-opt{margin-top:16px}
