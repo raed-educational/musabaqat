@@ -169,3 +169,18 @@ body.proj .rt-item{font-size:32px;padding:16px 18px}body.proj .rt-item::before{m
 .mx-reveal{text-align:center}.mx-big{font-size:90px;line-height:1.1;animation:ltPop .5s ease}.mx-reveal h2{margin:4px 0;color:var(--gold);font-size:32px}
 body.proj .mx-grid{max-width:1300px}body.proj .mx-stage{max-width:1400px}body.proj .mx-gift{font-size:56px}body.proj .mx-box b{font-size:34px}body.proj .mx-big{font-size:140px}body.proj .mx-reveal h2{font-size:50px}body.proj .mx-reveal p{font-size:26px}
 @media (max-width:600px){.mx-grid,.mx-grid.n20{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.mx-gift{font-size:24px}.mx-box b{font-size:16px}.mx-box{border-radius:12px}body.proj .mx-gift{font-size:26px}body.proj .mx-box b{font-size:17px}body.proj .mx-big{font-size:80px}body.proj .mx-reveal h2{font-size:26px}}
+
+/* ---------- صح ولا خطأ: الإقصاء */
+.el-card{max-width:1000px;margin:8px auto}
+.el-cand{margin:14px auto 4px;padding:14px 18px;border-radius:16px;background:rgba(232,150,46,.14);border:2px dashed var(--gold);text-align:center;font-size:22px}
+.el-cand span{display:block;font-size:15px;opacity:.8;margin-bottom:4px}.el-cand b{color:var(--gold)}
+.el-btns{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:1000px;margin:12px auto}
+.el-btn{font-family:inherit;font-size:44px;font-weight:800;padding:14px;border-radius:20px;border:3px solid transparent;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 6px 0 rgba(0,0,0,.35)}
+.el-btn span{font-size:28px}.el-btn.t{background:linear-gradient(160deg,#2fb36f,#17784a)}.el-btn.f{background:linear-gradient(160deg,#e0525a,#9b2530)}
+.el-btn:disabled{opacity:.45;cursor:default}.el-btn.right{opacity:1;border-color:#fff;box-shadow:0 0 0 5px rgba(79,208,138,.6)}.el-btn.wrong{opacity:1;outline:5px solid #ffb3b3}
+.kit-team.out{opacity:.4;filter:grayscale(1)}
+body.proj .el-cand{font-size:36px}body.proj .el-cand span{font-size:22px}body.proj .el-btn{font-size:70px;padding:22px}body.proj .el-btn span{font-size:44px}body.proj .el-card,body.proj .el-btns{max-width:1400px}
+@media (max-width:600px){.el-btn{font-size:32px;padding:10px}.el-btn span{font-size:22px}.el-cand{font-size:18px}body.proj .el-btn{font-size:34px}body.proj .el-cand{font-size:19px}}
+@media (max-width:600px){.kit-scores{grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:6px}.kit-team{padding:5px 6px;border-radius:12px}.kit-tname{font-size:15px}.kit-tscore{font-size:24px}body.proj .kit-tname{font-size:16px}body.proj .kit-tscore{font-size:26px}}
+.kit-scores.n5 .kit-tscore,.kit-scores.n6 .kit-tscore,.kit-scores.n7 .kit-tscore,.kit-scores.n8 .kit-tscore{font-size:26px}
+body.proj .kit-scores.n5 .kit-tscore,body.proj .kit-scores.n6 .kit-tscore,body.proj .kit-scores.n7 .kit-tscore,body.proj .kit-scores.n8 .kit-tscore{font-size:40px}

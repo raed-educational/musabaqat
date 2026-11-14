@@ -38,6 +38,7 @@
     bidding: { name: 'مزايدة النقاط', icon: '💎', engine: 'bidding', desc: 'يظهر القسم أولًا وتزايد من رصيدك على ثقتك قبل السؤال، والجولة الأخيرة كل شيء أو لا شيء.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
     rattib: { name: 'رتّب الإجابة', icon: '🔢', engine: 'rattib', desc: 'اسحب العناصر لترتيبها: السور، أحداث السيرة، الملوك، وفيات العلماء… مع درجات جزئية.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
     mystery: { name: 'الصندوق الغامض', icon: '🎁', engine: 'mystery', desc: 'افتح صندوقًا: سؤال تخاطر فيه ×٢ أو تلعبه بأمان، أو مفاجأة: كنز، قنبلة، سرقة، تبديل نقاط.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
+    elim: { name: 'صح ولا خطأ — الإقصاء', icon: '⚖️', engine: 'elim', desc: 'حكم سريع على إجابة مقترحة: صح أم خطأ؟ الوقت يقصر، والخطأ يُسقط قلبًا، وآخر الصامدين يفوز.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
     championship: { name: 'البطولة الكبرى', icon: '🏆', engine: 'championship', desc: 'خمس جولات حماسية تشمل كل الأقسام: إحماء، برق، عجلة، مهارة، والجولة الذهبية بنقاط مضاعفة.', types: ALLQ, rules: { championship: true } }
   };
 
@@ -89,6 +90,7 @@
   add(Object.assign(make('bidding', ALL, { key: 'bidding', title: 'مزايدة النقاط' }), { id: 'bidding', featured: true }));
   add(Object.assign(make('rattib', ALL, { key: 'rattib', title: 'رتّب الإجابة' }), { id: 'rattib', featured: true }));
   add(Object.assign(make('mystery', ALL, { key: 'mystery', title: 'الصندوق الغامض' }), { id: 'mystery', featured: true }));
+  add(Object.assign(make('elim', ALL, { key: 'elim', title: 'صح ولا خطأ — الإقصاء' }), { id: 'elim', featured: true }));
   [['classic', ALL, 'الشامل'], ['blitz', ALL, 'الخاطف الشامل'], ['survival', ALL, 'النجاة الشامل'],
    ['teams', ALL, 'مسابقة الفرق الكبرى'], ['duel', ALL, 'تحدي الثنائي الشامل'], ['buzzer', ALL, 'الجرس الشامل'], ['wheel', ALL, 'عجلة الأقسام'],
    ['who', ALL, 'من أنا؟ الشامل'], ['order', ALL, 'ترتيب شامل'], ['match', ALL, 'توصيل شامل'], ['verified', ALL, 'تحدي الموثّق الشامل'],
