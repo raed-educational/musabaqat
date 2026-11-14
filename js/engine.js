@@ -149,10 +149,16 @@
   function gameQuestions(game, opts, n) {
     const f = Object.assign({}, game.filter);
     if (opts.diff) f.diff = [opts.diff];
+    if (opts.stage) f.stage = opts.stage;
     if (opts.sub) f.subs = [opts.sub];
     const rnd = game.rules.daily ? mulberry32(hashStr(todayKey() + game.id)) : Math.random;
+    const min = n ? Math.min(n, 6) : 6;
+    if (W.QP.pickRelaxed) {
+      const list = W.QP.pickRelaxed(f, n || 0, rnd, min);
+      return list;
+    }
     let list = Bank.pick(f, 0, rnd);
-    if (!list.length && opts.diff) { delete f.diff; list = Bank.pick(f, 0, rnd); }
+    if (!list.length && (opts.diff || opts.stage)) { delete f.diff; delete f.stage; list = Bank.pick(f, 0, rnd); }
     return n ? list.slice(0, n) : list;
   }
 
@@ -164,6 +170,7 @@
     const r = game.rules; const rnd = r.daily ? mulberry32(hashStr(todayKey() + game.id + 'o')) : Math.random;
     const qs = gameQuestions(game, opts, r.endless ? 0 : r.count);
     if (!qs.length) { root.appendChild(h('p', null, 'لا توجد أسئلة كافية لهذه اللعبة بالخيارات الحالية.')); return; }
+    if (qs.filterNote) root.appendChild(h('div', { class: 'filter-note' }, qs.filterNote));
     const st = { i: 0, score: 0, correct: 0, wrong: 0, streak: 0, best: 0, lives: r.lives || 0, log: [], start: Date.now(), life: { fifty: 1, skip: 1, time: 1 } };
     const hud = h('div', { class: 'hud' }); const tb = timerBar(); const stage = h('div', { class: 'stage' });
     const lifeBar = h('div', { class: 'lifelines' });
@@ -288,6 +295,7 @@
       root.innerHTML = '';
       const qs = gameQuestions(game, opts, r.rounds * 2); const P = names.map(n => ({ name: n, score: 0, correct: 0 }));
       const board = h('div', { class: 'duel-board' }); const tb = timerBar(); const stage = h('div', { class: 'stage' });
+      if (qs.filterNote) root.appendChild(h('div', { class: 'filter-note' }, qs.filterNote));
       root.appendChild(board); root.appendChild(tb.el); root.appendChild(stage);
       let i = 0, perT = null, done = false; const log = [];
       function drawBoard() { board.innerHTML = ''; P.forEach((p, k) => board.appendChild(h('div', { class: 'duel-p' + (i % 2 === k ? ' turn' : '') }, h('div', { class: 'duel-name' }, (k ? '🟥 ' : '🟦 ') + p.name), h('div', { class: 'duel-score' }, toAr(Math.round(p.score)))))); }
@@ -315,6 +323,7 @@
       root.innerHTML = '';
       const qs = gameQuestions(game, opts, r.rounds).filter(q => q.type === 'mcq' || q.type === 'tf'); const P = names.map(n => ({ name: n, score: 0, correct: 0 }));
       const board = h('div', { class: 'duel-board' }); const tb = timerBar(); const stage = h('div', { class: 'stage' });
+      if (qs.filterNote) root.appendChild(h('div', { class: 'filter-note' }, qs.filterNote));
       root.appendChild(board); root.appendChild(tb.el); root.appendChild(stage);
       let i = 0, perT = null, buzzed = null, done = false, locked = [false, false]; const log = [];
       const keyH = e => { const k = e.key.toLowerCase(); if (k === 'a' || k === 'ش') buzz(0); if (k === 'l' || k === 'م') buzz(1); };
@@ -365,7 +374,9 @@
     function start() {
       const T = [...names.querySelectorAll('input')].map((x, k) => ({ name: x.value.trim() || defaults[k], score: 0, correct: 0 }));
       const qs = gameQuestions(game, opts, +roundsSel.value); const lim = +timeSel.value;
+      const tNote = qs.filterNote;
       root.innerHTML = ''; root.classList.add('host');
+      if (tNote) root.appendChild(h('div', { class: 'filter-note' }, tNote));
       const board = h('div', { class: 'team-board' }); const tb = timerBar(); const stage = h('div', { class: 'stage' });
       const tools = h('div', { class: 'row end' }, h('button', { class: 'btn ghost small', onclick: () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } }, '⛶ ملء الشاشة'), h('button', { class: 'btn ghost small', onclick: () => end() }, 'إنهاء المسابقة'));
       root.appendChild(tools); root.appendChild(board); root.appendChild(tb.el); root.appendChild(stage);
@@ -401,6 +412,7 @@
   // =====================================================================
   function runStudy(game, root, opts, finish) {
     const qs = gameQuestions(game, opts, game.rules.count || 30); let i = 0, known = 0, unknown = 0; const log = [];
+    if (qs.filterNote) root.appendChild(h('div', { class: 'filter-note' }, qs.filterNote));
     const stage = h('div', { class: 'stage' }); root.appendChild(stage);
     function show() {
       stage.innerHTML = ''; if (i >= qs.length) return finish({ game, opts, st: { score: known * 10, correct: known, wrong: unknown, log }, study: true });

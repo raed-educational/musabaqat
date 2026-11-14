@@ -219,3 +219,13 @@ body.proj .champ-splash h1{font-size:64px}body.proj .champ-splash p{font-size:32
 body.proj .champ-count-num{font-size:200px}body.proj .champ-combo{font-size:120px}
 body.proj .champ-sb-row{font-size:28px;padding:14px 20px}body.proj .champ-step{width:64px;height:64px;font-size:28px}
 body.proj .champ-rp b{font-size:20px}body.proj .champ-rp small{font-size:16px}body.proj .champ-double{font-size:28px}
+
+/* ---------- question filters (difficulty + school stage) ---------- */
+.qfilters{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:12px 0 16px}
+.qf-row{align-items:center;margin:0;gap:8px}.qf-row + .qf-row{margin-top:8px}
+.qf-label{font-weight:800;color:var(--muted);min-width:7.5rem;font-size:14px}
+.qfilters .chip{cursor:pointer;font:inherit;font-size:15px;color:#fff;min-height:44px;min-width:44px}
+.qfilters .chip.on{background:var(--pri);border-color:transparent;color:#1a1205}
+.filter-note{background:rgba(245,180,90,.15);border:1px solid var(--gold);color:var(--txt);border-radius:12px;padding:10px 14px;margin:10px 0;font-weight:700;text-align:center}
+body.proj .qfilters .chip,body.proj .qf-label{font-size:22px}body.proj .filter-note{font-size:24px}
+@media (max-width:600px){.qf-label{min-width:100%;display:block}.qf-row{align-items:flex-start}}

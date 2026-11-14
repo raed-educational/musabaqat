@@ -23,35 +23,62 @@
     long:   { key: 'long',   label: 'طويلة',  hint: '٣٦ سؤالًا — نحو نصف ساعة', counts: [7, 8, 7, 7, 7] }
   };
 
-  function pickOne(cat, types, diff, used) {
-    const tries = [
-      { cats: cat ? [cat] : null, types, diff },
-      { cats: cat ? [cat] : null, types },
-      { cats: cat ? [cat] : null, diff },
-      { cats: cat ? [cat] : null },
-      { types, diff },
-      { types },
-      {}
-    ];
-    for (const f of tries) {
-      const list = Bank.filter(f).filter(q => !used.has(q.id));
-      if (list.length) return list[Math.floor(Math.random() * list.length)];
+  function pickOne(cat, types, diff, used, filters, allowRelax) {
+    const layers = [];
+    const fl = filters || {};
+    layers.push(fl);
+    if (allowRelax && fl.stage) layers.push(Object.assign({}, fl, { stage: null }));
+    if (allowRelax && (fl.stage || fl.diff)) layers.push({ diff: null, stage: null });
+    let relaxed = false;
+    for (const layer of layers) {
+      const d = layer.diff ? [layer.diff] : diff;
+      const tries = [
+        { cats: cat ? [cat] : null, types, diff: d, stage: layer.stage || undefined },
+        { cats: cat ? [cat] : null, types, stage: layer.stage || undefined },
+        { cats: cat ? [cat] : null, diff: d, stage: layer.stage || undefined },
+        { cats: cat ? [cat] : null, stage: layer.stage || undefined },
+        { types, diff: d, stage: layer.stage || undefined },
+        { types, stage: layer.stage || undefined },
+        layer.stage || layer.diff ? { stage: layer.stage || undefined, diff: d } : {}
+      ];
+      for (const f of tries) {
+        if (!f.stage) delete f.stage;
+        if (!f.diff) delete f.diff;
+        if (!f.cats) delete f.cats;
+        const list = Bank.filter(f).filter(q => !used.has(q.id));
+        if (list.length) {
+          if (layer !== fl) relaxed = true;
+          return { q: list[Math.floor(Math.random() * list.length)], relaxed };
+        }
+      }
     }
-    return null;
+    return { q: null, relaxed };
   }
-  function buildRounds(lenKey) {
+  function buildRounds(lenKey, filters) {
     const len = LENGTHS[lenKey] || LENGTHS.normal;
     const cats = shuffle(Bank.cats.map(c => c.id));
     const total = len.counts.reduce((a, b) => a + b, 0);
     const plan = [];
     for (let i = 0; i < total; i++) plan.push(cats[i % cats.length]);
     const used = new Set();
-    return ROUNDS.map((r, ri) => {
-      const n = len.counts[ri], slice = plan.splice(0, n), qs = [];
-      slice.forEach(cat => { const q = pickOne(cat, r.types, r.diff, used); if (q) { used.add(q.id); qs.push(q); } });
-      while (qs.length < n) { const q = pickOne(null, r.types, r.diff, used); if (!q) break; used.add(q.id); qs.push(q); }
-      return Object.assign({}, r, { qs });
-    });
+    let relaxed = false;
+    function fill(allowRelax) {
+      const leftover = plan.slice();
+      const rounds = ROUNDS.map((r, ri) => {
+        const n = len.counts[ri], slice = leftover.splice(0, n), qs = [];
+        slice.forEach(cat => { const got = pickOne(cat, r.types, r.diff, used, filters, allowRelax); if (got.q) { used.add(got.q.id); qs.push(got.q); if (got.relaxed) relaxed = true; } });
+        while (qs.length < n) { const got = pickOne(null, r.types, r.diff, used, filters, allowRelax); if (!got.q) break; used.add(got.q.id); qs.push(got.q); if (got.relaxed) relaxed = true; }
+        return Object.assign({}, r, { qs });
+      });
+      return rounds;
+    }
+    let rounds = fill(false);
+    if (rounds.some((r, i) => r.qs.length < len.counts[i]) && (filters && (filters.stage || filters.diff))) {
+      used.clear();
+      rounds = fill(true);
+    }
+    const note = relaxed && W.QP.relaxNote ? W.QP.relaxNote(filters, (filters.stage && filters.diff) ? 'stage,diff' : filters.stage ? 'stage' : 'diff') : null;
+    return { rounds, note };
   }
 
   function confetti(root) {
@@ -108,7 +135,7 @@
       const startBtn = h('button', { class: 'btn primary big', id: 'startBtn', onclick: () => {
         const names = [...namesBox.querySelectorAll('.inp')].map(i => (i.value || '').trim().slice(0, 20) || 'متسابق');
         if (names[0]) Player.name = names[0];
-        begin(names, lenKey);
+        begin(names, lenKey, W.QP.getQFilters ? W.QP.getQFilters() : {});
       } }, '🔥 ابدأ البطولة');
       wrap.appendChild(h('div', { class: 'card intro champ-setup' },
         h('div', { class: 'intro-icon' }, '🏆'),
@@ -118,13 +145,16 @@
         h('label', null, 'عدد المتسابقين (فردي أو أسماء الفرق)'), pChips,
         namesBox,
         h('label', null, 'مدة البطولة'), lChips, hint,
+        W.QP.filterBar ? W.QP.filterBar({}) : null,
         startBtn,
         h('p', { class: 'muted small' }, 'تُحفظ النتيجة في ملفك ولوحة الصدارة مثل بقية الألعاب.')));
     }
 
-    function begin(names, lenKey) {
-      const rounds = buildRounds(lenKey);
+    function begin(names, lenKey, filters) {
+      const built = buildRounds(lenKey, filters || {});
+      const rounds = built.rounds;
       if (rounds.every(r => !r.qs.length)) { wrap.innerHTML = ''; wrap.appendChild(h('p', { class: 'center' }, 'تعذّر تجهيز الأسئلة.')); return; }
+      const filterNote = built.note;
       const players = names.map((name, i) => ({ name, score: 0, correct: 0, wrong: 0, streak: 0, best: 0, prevRank: i }));
       const st = { i: 0, score: 0, correct: 0, wrong: 0, streak: 0, best: 0, log: [], start: Date.now(), roundPts: [] };
       let rIdx = 0, qIdx = 0, turn = 0, prevRanks = players.map((_, i) => i);
@@ -166,6 +196,7 @@
       function splash(round, then) {
         Sound.fanfare();
         wrap.innerHTML = '';
+        if (filterNote && rIdx === 0) wrap.appendChild(h('div', { class: 'filter-note' }, filterNote));
         const el = h('div', { class: 'champ-splash' + (round.golden ? ' gold' : '') },
           h('div', { class: 'champ-splash-icon' }, round.icon),
           h('div', { class: 'champ-kicker' }, 'الجولة ' + toAr(rIdx + 1) + ' من ' + toAr(rounds.length)),

@@ -229,7 +229,7 @@
       const catSel = h('select', { class: 'inp', id: 'oCat' }, h('option', { value: '' }, '🌐 كل الأقسام'), Bank.cats.map(c => h('option', { value: c.id }, c.icon + ' ' + c.name)));
       const nSel = h('select', { class: 'inp', id: 'oN' }, [5, 10, 15, 20, 30].map(n => h('option', { value: n, selected: n === 10 }, toAr(n) + ' أسئلة')));
       const tSel = h('select', { class: 'inp', id: 'oT' }, [10, 15, 20, 30, 45].map(n => h('option', { value: n, selected: n === 20 }, toAr(n) + ' ثانية')));
-      const dSel = h('select', { class: 'inp', id: 'oD' }, h('option', { value: '' }, 'كل المستويات'), [1, 2, 3].map(d => h('option', { value: d }, W.QP.DIFF[d])));
+      const dSel = null;
       const qr = h('div', { class: 'qr' });
       loadOne(LIBS.qr).then(() => { try { const q = W.qrcode(0, 'M'); q.addData(link); q.make(); qr.innerHTML = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); } catch (e) {} }).catch(() => {});
       const players = h('div', { class: 'lobby-players' });
@@ -242,11 +242,12 @@
             h('div', { class: 'row' }, h('button', { class: 'btn small', onclick: () => copy(link) }, '📋 نسخ رابط الانضمام'), navigator.share ? h('button', { class: 'btn small', onclick: () => navigator.share({ title: 'انضم إلى مسابقتي', text: 'انضم إلى غرفتي في منصة المسابقات العلمية — الرمز ' + code, url: link }).catch(() => {}) }, '📤 مشاركة') : null),
             h('div', { class: 'muted small', dir: 'ltr' }, link)),
           qr),
-        h('div', { class: 'grid3' }, h('label', null, 'القسم', catSel), h('label', null, 'عدد الأسئلة', nSel), h('label', null, 'وقت السؤال', tSel), h('label', null, 'المستوى', dSel)),
+        h('div', { class: 'grid3' }, h('label', null, 'القسم', catSel), h('label', null, 'عدد الأسئلة', nSel), h('label', null, 'وقت السؤال', tSel)),
+        W.QP.filterBar ? W.QP.filterBar({}) : null,
         h('h2', null, '👥 اللاعبون'), players,
         h('div', { class: 'row center' }, startBtn),
         h('p', { class: 'muted small center' }, '⚠️ أبقِ هذه الصفحة مفتوحة: جهازك هو الذي يدير المسابقة، وإغلاقها ينهي الغرفة.')));
-      lobbyEls.start = () => ({ cat: catSel.value, n: +nSel.value, dur: +tSel.value, diff: dSel.value ? +dSel.value : null });
+      lobbyEls.start = () => { const fl = W.QP.getQFilters ? W.QP.getQFilters() : {}; return { cat: catSel.value, n: +nSel.value, dur: +tSel.value, diff: fl.diff || null, stage: fl.stage || null }; };
       refresh();
     }
     function copy(t) { (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => alert('تم نسخ الرابط'), () => prompt('انسخ الرابط:', t)); }
@@ -266,9 +267,10 @@
       const s = lobbyEls.start(); const cats = s.cat ? [s.cat] : Bank.cats.map(c => c.id);
       view.innerHTML = ''; view.appendChild(h('p', { class: 'center muted' }, '⏳ جارٍ تحميل الأسئلة…'));
       Bank.ensure(cats).then(() => {
-        const f = { cats, types: ['mcq', 'tf'], balanceCats: cats.length > 1 }; if (s.diff) f.diff = [s.diff];
-        let qs = Bank.pick(f, s.n); if (qs.length < s.n && s.diff) { delete f.diff; qs = Bank.pick(f, s.n); }
+        const f = { cats, types: ['mcq', 'tf'], balanceCats: cats.length > 1 }; if (s.diff) f.diff = [s.diff]; if (s.stage) f.stage = s.stage;
+        const qs = W.QP.pickRelaxed ? W.QP.pickRelaxed(f, s.n, null, s.n) : (Bank.pick(f, s.n) || []);
         if (!qs.length) { errorCard(view, 'لا توجد أسئلة مناسبة لهذا الاختيار.'); return; }
+        if (qs.filterNote) view.insertBefore(h('div', { class: 'filter-note' }, qs.filterNote), view.firstChild);
         list().forEach(p => { p.score = 0; p.correct = 0; }); Object.keys(P).forEach(k => { if (P[k].left) delete P[k]; });
         game = { qs: qs.map(q => { const ord = q.type === 'tf' ? q.options.map((_, i) => i) : shuffle(q.options.map((_, i) => i)); return { q, ord }; }), i: -1, s, log: [], phase: 'q' };
         broadcast({ t: 'start', n: qs.length, title: lobbyEls.title() });

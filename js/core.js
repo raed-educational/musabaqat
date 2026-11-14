@@ -35,10 +35,12 @@
   let _all = null;
   function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('failed ' + src)); document.head.appendChild(s); }); }
   function match(q, f) {
+    const st = q.stage || (W.quizStageOf && W.quizStageOf(q));
     return (!f.cats || !f.cats.length || f.cats.includes(q.category)) &&
       (!f.subs || !f.subs.length || f.subs.includes(q.subcategory)) &&
       (!f.types || !f.types.length || f.types.includes(q.type)) &&
       (!f.diff || (Array.isArray(f.diff) ? f.diff.includes(+q.difficulty) : +q.difficulty === +f.diff)) &&
+      (!f.stage || st === f.stage) &&
       (!f.verifiedOnly || q.verified);
   }
   const Bank = {
@@ -57,6 +59,7 @@
       const del = new Set(this.deleted()); const custom = this.custom(); const cid = new Set(custom.map(q => q.id));
       const base = []; Object.values(W.QUIZ_BANK).forEach(list => list.forEach(q => { if (!del.has(q.id) && !cid.has(q.id)) base.push(q); }));
       _all = base.concat(custom.filter(q => !del.has(q.id)));
+      if (W.quizStageOf) _all.forEach(q => { q.stage = W.quizStageOf(q); });
       return _all;
     },
     invalidate() { _all = null; },
@@ -64,9 +67,10 @@
     // counting works without loading the data (uses the manifest) + local custom questions
     count(f) {
       f = f || {}; let n = 0;
+      const MANIFEST = f.stage ? (W.QUIZ_STAGE_MANIFEST || {}) : MAN;
       CATS.forEach(c => {
         if (f.cats && f.cats.length && !f.cats.includes(c.id)) return;
-        Object.entries(MAN[c.id] || {}).forEach(([k, v]) => { const [sub, type, diff, ver] = k.split('|'); if (match({ category: c.id, subcategory: sub, type, difficulty: +diff, verified: ver === '1' }, f)) n += v; });
+        Object.entries(MANIFEST[c.id] || {}).forEach(([k, v]) => { const [sub, type, diff, ver, stage] = k.split('|'); if (match({ category: c.id, subcategory: sub, type, difficulty: +diff, verified: ver === '1', stage: stage || undefined }, f)) n += v; });
       });
       this.custom().forEach(q => { if (match(q, f)) n++; });
       return n;

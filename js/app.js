@@ -39,12 +39,19 @@
         h('div', { class: 'row' }, h('a', { class: 'btn primary big', href: '#/play/daily' }, '📅 تحدي اليوم'), h('a', { class: 'btn big', href: '#/play/' + encodeURIComponent('wheel-mix-عجلة الأقسام') }, '🎡 عجلة الأقسام'), h('a', { class: 'btn ghost big', href: '#/games' }, '🎮 كل الألعاب'))),
       h('div', { class: 'hero-art' }, h('img', { class: 'hero-logo', src: 'assets/logo-official.png', alt: 'شعار برنامج رائد' }))));
     const grid = h('div', { class: 'cat-grid' });
-    Bank.cats.forEach(c => {
-      const n = Bank.count({ cats: [c.id] }); const subs = Bank.subcats(c.id).slice(0, 5);
-      grid.appendChild(h('a', { class: 'cat-card', href: '#/cat/' + c.id, style: { '--c': c.color } }, h('div', { class: 'cat-icon' }, c.icon), h('div', { class: 'cat-name' }, c.name), h('div', { class: 'cat-desc' }, c.desc),
-        h('div', { class: 'chips' }, subs.map(([s]) => h('span', { class: 'chip small' }, s))), h('div', { class: 'cat-count' }, fmt(n) + ' سؤال')));
-    });
-    view.appendChild(h('h2', { class: 'section-title' }, '📚 الأقسام')); view.appendChild(grid);
+    function drawCats() {
+      const fl = W.QP.getQFilters ? W.QP.getQFilters() : {};
+      grid.innerHTML = '';
+      Bank.cats.forEach(c => {
+        const f = { cats: [c.id] }; if (fl.diff) f.diff = [fl.diff]; if (fl.stage) f.stage = fl.stage;
+        const n = Bank.count(f); const subs = Bank.subcats(c.id).slice(0, 5);
+        grid.appendChild(h('a', { class: 'cat-card', href: '#/cat/' + c.id, style: { '--c': c.color } }, h('div', { class: 'cat-icon' }, c.icon), h('div', { class: 'cat-name' }, c.name), h('div', { class: 'cat-desc' }, c.desc),
+          h('div', { class: 'chips' }, subs.map(([s]) => h('span', { class: 'chip small' }, s))), h('div', { class: 'cat-count' }, fmt(n) + ' سؤال')));
+      });
+    }
+    view.appendChild(h('h2', { class: 'section-title' }, '📚 الأقسام'));
+    if (W.QP.filterBar) view.appendChild(W.QP.filterBar({ onChange: drawCats }));
+    view.appendChild(grid); drawCats();
     view.appendChild(h('h2', { class: 'section-title' }, '🎮 أنماط اللعب'));
     const modes = h('div', { class: 'mode-grid' });
     Object.entries(MODES).forEach(([id, m]) => modes.appendChild(h('a', { class: 'mode', href: '#/games?mode=' + id }, h('span', { class: 'mode-icon' }, m.icon), h('b', null, m.name), h('small', null, m.desc))));
@@ -55,14 +62,32 @@
   function category(id) {
     const c = Bank.cat(id); if (!c) return go('');
     setActive('home');
-    const subs = Bank.subcats(id); const qn = Bank.count({ cats: [id] }); const dc = Bank.diffCounts(id);
-    const byD = [dc[1], dc[2], dc[3]];
-    view.appendChild(h('div', { class: 'cat-head', style: { '--c': c.color } }, h('div', { class: 'cat-icon big' }, c.icon), h('div', null, h('h1', null, c.name), h('p', null, c.desc),
-      h('div', { class: 'chips' }, h('span', { class: 'chip' }, '📚 ' + fmt(qn) + ' سؤال'), [1, 2, 3].map(d => h('span', { class: 'chip d' + d }, DIFF[d] + ': ' + fmt(byD[d - 1]))), h('span', { class: 'chip' }, '✔ موثّق: ' + fmt(Bank.countVerified(id)))))));
+    const headStats = h('div', { class: 'chips' });
+    const subWrap = h('div', { class: 'sub-grid' });
+    const gameWrap = h('div', { class: 'game-grid' });
+    function fBase() { const fl = W.QP.getQFilters ? W.QP.getQFilters() : {}; const f = { cats: [id] }; if (fl.diff) f.diff = [fl.diff]; if (fl.stage) f.stage = fl.stage; return f; }
+    function drawCat() {
+      const f = fBase(); const qn = Bank.count(f); const dc = Bank.diffCounts(id);
+      headStats.innerHTML = '';
+      headStats.appendChild(h('span', { class: 'chip' }, '📚 ' + fmt(qn) + ' سؤال'));
+      [1, 2, 3].forEach(d => headStats.appendChild(h('span', { class: 'chip d' + d }, DIFF[d] + ': ' + fmt(Bank.count(Object.assign({}, f, { diff: [d] }))))));
+      headStats.appendChild(h('span', { class: 'chip' }, '✔ موثّق: ' + fmt(Bank.countVerified(id))));
+      const subs = Bank.subcats(id);
+      subWrap.innerHTML = '';
+      subs.forEach(([s]) => {
+        const n = Bank.count(Object.assign({}, f, { subs: [s] }));
+        if (n <= 0 && (f.stage || f.diff)) return;
+        subWrap.appendChild(h('a', { class: 'sub', href: '#/play/' + encodeURIComponent('classic-' + id) + '?sub=' + encodeURIComponent(s) }, h('b', null, s), h('span', null, fmt(n) + ' سؤال • العب ←')));
+      });
+      const games = GAMES.filter(g => g.filter.cats.length === 1 && g.filter.cats[0] === id && Bank.count(W.QP.applyQFilters ? W.QP.applyQFilters(g.filter, W.QP.getQFilters()) : g.filter) >= (g.engine === 'ladder' ? 15 : 6));
+      gameWrap.innerHTML = ''; games.forEach(g => gameWrap.appendChild(gameCard(g)));
+    }
+    view.appendChild(h('div', { class: 'cat-head', style: { '--c': c.color } }, h('div', { class: 'cat-icon big' }, c.icon), h('div', null, h('h1', null, c.name), h('p', null, c.desc), headStats)));
+    if (W.QP.filterBar) view.appendChild(W.QP.filterBar({ onChange: drawCat }));
     view.appendChild(h('h2', { class: 'section-title' }, '🗂️ الأقسام الفرعية'));
-    view.appendChild(h('div', { class: 'sub-grid' }, subs.map(([s, n]) => h('a', { class: 'sub', href: '#/play/' + encodeURIComponent('classic-' + id) + '?sub=' + encodeURIComponent(s) }, h('b', null, s), h('span', null, fmt(n) + ' سؤال • العب ←')))));
+    view.appendChild(subWrap);
     view.appendChild(h('h2', { class: 'section-title' }, '🎮 ألعاب ' + c.name));
-    view.appendChild(h('div', { class: 'game-grid' }, GAMES.filter(g => g.filter.cats.length === 1 && g.filter.cats[0] === id).map(gameCard)));
+    view.appendChild(gameWrap); drawCat();
   }
 
   // ---------------------------------------------------------------- CATALOG
@@ -74,12 +99,22 @@
     const grid = h('div', { class: 'game-grid' }); const count = h('span', { class: 'muted' });
     function draw() {
       const cv = catSel.value, mv = modeSel.value, sv = search.value.trim();
-      const list = GAMES.filter(g => (!cv || (cv === '__mix' ? g.filter.cats.length > 1 : g.filter.cats.length === 1 && g.filter.cats[0] === cv)) && (!mv || g.mode === mv) && (!sv || g.title.includes(sv) || g.desc.includes(sv)));
+      const fl = W.QP.getQFilters ? W.QP.getQFilters() : {};
+      const list = GAMES.filter(g => {
+        if (!(!cv || (cv === '__mix' ? g.filter.cats.length > 1 : g.filter.cats.length === 1 && g.filter.cats[0] === cv)) || !(!mv || g.mode === mv) || !(!sv || g.title.includes(sv) || g.desc.includes(sv))) return false;
+        const f = W.QP.applyQFilters ? W.QP.applyQFilters(g.filter, fl) : g.filter;
+        const need = g.engine === 'ladder' ? 15 : (g.engine === 'championship' ? 12 : 6);
+        return Bank.count(f) >= need;
+      });
       grid.innerHTML = ''; list.forEach(g => grid.appendChild(gameCard(g))); count.textContent = fmt(list.length) + ' لعبة';
+      let note = grid.parentNode && grid.parentNode.querySelector('.filter-note');
+      if (note) note.remove();
+      if (!list.length) grid.appendChild(h('p', { class: 'filter-note' }, 'تنبيه: لا توجد ألعاب كافية لهذا الاختيار، جرّب «الكل» في الصعوبة أو المرحلة.'));
     }
     [catSel, modeSel].forEach(s => s.addEventListener('change', draw)); search.addEventListener('input', draw);
     view.appendChild(h('h1', null, '🎮 دليل الألعاب'));
     view.appendChild(h('p', { class: 'muted' }, 'كل لعبة هنا هي تركيبة من: نمط لعب × قسم/أقسام × قواعد (وقت، أرواح، صعوبة، وسائل مساعدة). عدد الألعاب: ' + fmt(GAMES.length) + '، مبنية على ' + toAr(Object.keys(ENGINES).length) + ' محركات لعب و' + toAr(Object.keys(TYPES).length) + ' أنواع أسئلة.'));
+    if (W.QP.filterBar) view.appendChild(W.QP.filterBar({ onChange: draw }));
     view.appendChild(h('div', { class: 'filters' }, catSel, modeSel, search, count)); view.appendChild(grid); draw();
   }
 
@@ -92,22 +127,32 @@
       const root = h('div', { class: 'game-root champ-root' });
       view.appendChild(root);
       root.appendChild(h('p', { class: 'center muted' }, '⏳ جارٍ تحميل الأسئلة…'));
-      Bank.ensure(g.filter.cats).then(() => { root.innerHTML = ''; running = ENGINES.championship(g, root, {}, results) || null; })
+      Bank.ensure(g.filter.cats).then(() => { root.innerHTML = ''; running = ENGINES.championship(g, root, W.QP.getQFilters ? W.QP.getQFilters() : {}, results) || null; })
         .catch(() => { root.innerHTML = ''; root.appendChild(h('p', { class: 'center' }, 'تعذّر تحميل ملفات الأسئلة. إن كنت تفتح الملف مباشرة فجرّب عبر خادم أو الرابط المنشور.')); });
       return;
     }
-    const diffSel = h('select', { class: 'inp' }, h('option', { value: '' }, 'كل المستويات'), [1, 2, 3].map(d => h('option', { value: d, selected: String(params.diff) === String(d) }, DIFF[d])));
+    if (params.diff && W.QP.setQFilters) W.QP.setQFilters({ diff: +params.diff });
     const subs = g.filter.cats.length === 1 ? Bank.subcats(g.filter.cats[0]) : [];
     const subSel = h('select', { class: 'inp' }, h('option', { value: '' }, 'كل الأقسام الفرعية'), subs.filter(([s]) => !g.filter.subs || g.filter.subs.includes(s)).map(([s, n]) => h('option', { value: s, selected: params.sub === s }, s + ' (' + toAr(n) + ')')));
     const nameIn = h('input', { class: 'inp', value: Player.name, placeholder: 'اسم اللاعب', oninput: e => { Player.name = e.target.value; } });
+    const avail = h('p', { class: 'muted small' });
+    function availTxt() {
+      const fl = W.QP.getQFilters ? W.QP.getQFilters() : {};
+      const f = W.QP.applyQFilters ? W.QP.applyQFilters(g.filter, fl) : g.filter;
+      const n = Bank.count(f);
+      avail.textContent = 'متوفر ' + fmt(n) + ' سؤال لهذه اللعبة' + (fl.diff || fl.stage ? ' بهذا الاختيار' : '');
+      return n;
+    }
     const r = g.rules;
     const rulesTxt = [r.count && '❓ ' + toAr(r.count) + ' سؤالًا', r.perQ && '⏱ ' + toAr(r.perQ) + ' ثانية للسؤال', r.totalTime && '⚡ ' + toAr(r.totalTime) + ' ثانية إجمالًا', r.lives && '❤️ ' + toAr(r.lives) + ' أرواح', r.endless && '♾ حتى النهاية', r.streak && '🔥 مضاعف التتابع', r.speedBonus && '🚀 مكافأة السرعة', r.lifelines && '🛟 وسائل مساعدة', r.steps && '🪜 ' + toAr(r.steps) + ' درجة', r.rounds && '🔁 ' + toAr(r.rounds) + ' جولات'].filter(Boolean);
     const intro = h('div', { class: 'card intro' }, h('div', { class: 'intro-icon' }, g.icon), h('h1', null, g.title), h('p', null, g.desc), h('div', { class: 'chips center' }, rulesTxt.map(t => h('span', { class: 'chip' }, t))),
-      h('div', { class: 'grid3' }, h('label', null, 'اسم اللاعب', nameIn), !g.rules.daily && g.engine !== 'ladder' ? h('label', null, 'مستوى الصعوبة', diffSel) : null, !g.rules.daily && subs.length > 1 ? h('label', null, 'القسم الفرعي', subSel) : null),
-      h('button', { class: 'btn primary big', id: 'startBtn', onclick: start }, '▶ ابدأ اللعب'), h('p', { class: 'muted small' }, 'متوفر ' + fmt(g.available) + ' سؤال لهذه اللعبة'));
-    view.appendChild(intro);
+      h('div', { class: 'grid3' }, h('label', null, 'اسم اللاعب', nameIn), !g.rules.daily && subs.length > 1 ? h('label', null, 'القسم الفرعي', subSel) : null),
+      !g.rules.daily && W.QP.filterBar ? W.QP.filterBar({ onChange: availTxt }) : null,
+      h('button', { class: 'btn primary big', id: 'startBtn', onclick: start }, '▶ ابدأ اللعب'), avail);
+    view.appendChild(intro); availTxt();
     function start() {
-      const opts = { diff: diffSel.value ? +diffSel.value : null, sub: subSel.value || null };
+      const fl = W.QP.getQFilters ? W.QP.getQFilters() : {};
+      const opts = { diff: fl.diff || null, stage: fl.stage || null, sub: subSel.value || null };
       view.innerHTML = ''; const root = h('div', { class: 'game-root' }); view.appendChild(h('div', { class: 'game-title' }, g.icon + ' ' + g.title)); view.appendChild(root);
       root.appendChild(h('p', { class: 'center muted', id: 'loadingQ' }, '⏳ جارٍ تحميل الأسئلة…'));
       Bank.ensure(g.filter.cats).then(() => { root.innerHTML = ''; running = ENGINES[g.engine](g, root, opts, results) || null; })
@@ -180,6 +225,12 @@
         h('li', null, h('span', { class: 'badge pending' }, '⏳ بانتظار المراجعة العلمية'), ' — سؤال محرر يدويًا من كتب معتمدة ويُنصح بمراجعته من مختص قبل اعتماده في مسابقات رسمية.')),
       h('p', null, 'أحاديث المنصة من الصحيحين فقط، وقد استُبعدت آليًا أي عبارة لم يُعثر عليها في نصيهما.'),
       h('table', { class: 'board' }, h('thead', null, h('tr', null, ['القسم', 'الأسئلة', 'موثّق من النص', 'من مرجع مفتوح'].map(x => h('th', null, x)))), h('tbody', null, m)),
+      h('h2', null, 'الصعوبة والمرحلة الدراسية'),
+      h('p', null, 'لكل سؤال مستويان يمكن اختيارهما في كل الألعاب والبطولة ودليل الألعاب، ويُحفظ اختيارك على هذا الجهاز:'),
+      h('ul', null,
+        h('li', null, h('b', null, 'الصعوبة: '), 'سهل، متوسط، صعب — كما هي مصنّفة في بنك الأسئلة (١ و٢ و٣).'),
+        h('li', null, h('b', null, 'المرحلة الدراسية: '), 'ابتدائي، متوسط، ثانوي، جامعي. لا يوجد حقل جاهز في المصدر، فصُنّف كل سؤال تلقائيًا بحسب صعوبته وقسمه الفرعي ونوعه وطول نصه: الحقائق الأساسية والأسئلة القصيرة للمرحلة الابتدائية، والعامة لصعوبة ١–٢ للمتوسط، والأعمق لصعوبة ٢–٣ للثانوي، وموضوعات أصول الفقه وتخريج الحديث وعلم الرجال والمتون التخصصية للجامعي.')),
+      h('p', null, 'إذا قلّت الأسئلة تحت اختيار معيّن تُستكمل تلقائيًا من أقرب مستوى، مع تنبيه واضح بالعربية.'),
       h('p', null, h('a', { class: 'btn', href: 'admin.html' }, '🛠 لوحة إدارة الأسئلة'))));
   }
 
