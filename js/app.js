@@ -28,7 +28,7 @@
         h('div', { class: 'player-row' }, h('a', { class: 'pf-mini', href: '#/profile', title: 'ملفي' }, W.QP.Player.avatar ? W.QP.Player.avatar() : '👤'), h('label', null, 'اسم اللاعب'), nameIn),
         h('div', { class: 'row' }, h('a', { class: 'btn primary big', id: 'onlineHome', href: '#/online' }, '📡 مسابقة أونلاين مع أصدقائك'), h('a', { class: 'btn ghost big', href: '#/profile' }, '👤 ملفي وإنجازاتي'), h('a', { class: 'btn ghost big', id: 'globalHome', href: '#/global' }, '🌍 لوحة الصدارة العامة')),
         h('div', { class: 'row' }, h('a', { class: 'btn primary big', href: '#/play/daily' }, '📅 تحدي اليوم'), h('a', { class: 'btn big', href: '#/play/' + encodeURIComponent('wheel-mix-عجلة الأقسام') }, '🎡 عجلة الأقسام'), h('a', { class: 'btn ghost big', href: '#/games' }, '🎮 كل الألعاب'))),
-      h('div', { class: 'hero-art', 'aria-hidden': 'true' }, '🏆')));
+      h('div', { class: 'hero-art' }, h('img', { class: 'hero-logo', src: 'assets/logo-official.png', alt: 'شعار برنامج رائد' }))));
     const grid = h('div', { class: 'cat-grid' });
     Bank.cats.forEach(c => {
       const n = Bank.count({ cats: [c.id] }); const subs = Bank.subcats(c.id).slice(0, 5);
@@ -171,5 +171,16 @@
   W.addEventListener('hashchange', route);
   const snd = document.getElementById('soundBtn');
   if (snd) { const upd = () => snd.textContent = Sound.on ? '🔊' : '🔇'; upd(); snd.addEventListener('click', () => { Sound.on = !Sound.on; upd(); }); }
+  // projector / presentation mode (remembered) + fullscreen
+  const pj = document.getElementById('projBtn'), fs = document.getElementById('fsBtn'), D = document, R = D.documentElement;
+  const setProj = on => { D.body.classList.toggle('proj', on); W.QP.LS.set('projector', on); if (pj) { pj.classList.toggle('on', on); pj.setAttribute('aria-pressed', on); } };
+  setProj(!!W.QP.LS.get('projector', false));
+  if (pj) pj.addEventListener('click', () => setProj(!D.body.classList.contains('proj')));
+  const fsEl = () => D.fullscreenElement || D.webkitFullscreenElement;
+  const canFs = R.requestFullscreen || R.webkitRequestFullscreen;
+  if (fs) { if (!canFs) fs.classList.add('hidden'); else {
+    const upd = () => { fs.textContent = fsEl() ? '🗗' : '⛶'; fs.title = fsEl() ? 'الخروج من ملء الشاشة' : 'ملء الشاشة'; };
+    fs.addEventListener('click', () => { if (fsEl()) (D.exitFullscreen || D.webkitExitFullscreen).call(D); else { const r = (R.requestFullscreen || R.webkitRequestFullscreen).call(R); if (r && r.catch) r.catch(() => {}); } });
+    D.addEventListener('fullscreenchange', upd); D.addEventListener('webkitfullscreenchange', upd); upd(); } }
   route();
 })(window);

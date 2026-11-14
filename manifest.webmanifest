@@ -1,0 +1,31 @@
+{
+ "name": "مسابقات برنامج رائد",
+ "short_name": "رائد",
+ "description": "منصة مسابقات وألعاب علمية — برنامج رائد",
+ "lang": "ar",
+ "dir": "rtl",
+ "start_url": "./index.html#/",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#06272a",
+ "theme_color": "#06272a",
+ "icons": [
+  {
+   "src": "icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "icons/icon-maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

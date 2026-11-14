@@ -2,17 +2,20 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>منصة المسابقات العلمية</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مسابقات برنامج رائد — منصة المسابقات العلمية</title>
 <meta name="description" content="منصة ألعاب ومسابقات علمية: القرآن وعلومه، الحديث الصحيح، العقيدة، الفقه وأصوله، اللغة العربية، السيرة، الصحابة، التابعون، العلماء، تاريخ المملكة، كرة القدم.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+<link rel="icon" href="icons/favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#06272a"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="رائد"><meta name="apple-mobile-web-app-status-bar-style" content="black"><text y='.9em' font-size='90'>🏆</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <header class="topbar">
-  <a class="logo" href="#/">🏆 <span>المسابقات العلمية</span></a>
+  <a class="logo" href="#/"><img class="brand-logo" src="assets/logo-official.png" alt="شعار برنامج رائد"><span>مسابقات برنامج رائد</span></a>
   <nav class="nav">
     <a href="#/" data-nav="home">الرئيسية</a>
     <a href="#/games" data-nav="games">الألعاب</a>
@@ -23,7 +26,7 @@
     <a href="#/about" data-nav="about">عن المنصة</a>
     <a href="admin.html">الإدارة</a>
   </nav>
-  <button id="soundBtn" class="icon-btn" title="الصوت">🔊</button>
+  <div class="top-tools"><button id="projBtn" class="icon-btn" title="وضع العرض للبروجكتر والشاشة الكبيرة" aria-label="وضع العرض">📽️</button><button id="fsBtn" class="icon-btn" title="ملء الشاشة" aria-label="ملء الشاشة">⛶</button><button id="soundBtn" class="icon-btn" title="الصوت" aria-label="الصوت">🔊</button></div>
 </header>
 <main id="view" class="container"><p class="center muted">جارٍ التحميل…</p></main>
 <footer class="footer">منصة المسابقات العلمية — كل سؤال مقرون بمصدره. الأسئلة غير الموثقة آليًا بانتظار مراجعة المختصين.</footer>
