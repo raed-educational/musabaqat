@@ -11,7 +11,8 @@
 
   const SELF_SETUP = ['seenjeem', 'huroof', 'millionaire', 'letters', 'memory', 'sullam', 'bidding', 'rattib', 'mystery', 'elim', 'hotseat'];
   const FLAGSHIP = [
-    ['millionaire', '💰', 'من سيربح المليون', '١٥ سؤالًا وسلّم الجوائز الحقيقي ومحطتا أمان ووسائل المساعدة الثلاث.']
+    ['millionaire', '💰', 'من سيربح المليون', '١٥ سؤالًا وسلّم الجوائز الحقيقي ومحطتا أمان ووسائل المساعدة الثلاث.'],
+    ['letters', '🔤', 'تحدي الحروف', 'حرف عشوائي كل جولة: سباق إجابات تبدأ به، ثم «عبّي الخانات» صحابي وسورة ونبي ومدينة…']
   ];
   function gameCard(g) {
     const cats = g.filter.cats.map(id => Bank.cat(id)).filter(Boolean);
