@@ -9,6 +9,10 @@
   function go(path) { location.hash = '#/' + path; }
   function setActive(name) { document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('active', a.dataset.nav === name)); }
 
+  const SELF_SETUP = ['seenjeem', 'huroof', 'millionaire', 'letters', 'memory', 'sullam', 'bidding', 'rattib', 'mystery', 'elim', 'hotseat'];
+  const FLAGSHIP = [
+    ['millionaire', '💰', 'من سيربح المليون', '١٥ سؤالًا وسلّم الجوائز الحقيقي ومحطتا أمان ووسائل المساعدة الثلاث.']
+  ];
   function gameCard(g) {
     const cats = g.filter.cats.map(id => Bank.cat(id)).filter(Boolean);
     const c = cats.length === 1 ? cats[0] : null;
@@ -42,6 +46,8 @@
         h('div', { class: 'party-body' }, h('div', { class: 'champ-kicker' }, 'خلية الحروف'), h('h2', null, 'حروف'),
           h('p', null, 'لوحة سداسية من ٢٥ حرفًا: الأخضر يصل اليمين باليسار، والبرتقالي يصل الأعلى بالأسفل. كل حرف وراه سؤال جوابه يبدأ به.'),
           h('span', { class: 'btn primary' }, '▶ العب حروف')))));
+    view.appendChild(h('div', { class: 'flag-grid' }, FLAGSHIP.filter(f => W.QP.game(f[0])).map(([id, icon, title, desc]) => h('a', { class: 'flag-card', id: 'flag-' + id, href: '#/play/' + id },
+      h('div', { class: 'flag-icon' }, icon), h('div', { class: 'flag-body' }, h('h3', null, title), h('p', null, desc)), h('span', { class: 'btn primary small' }, '▶ العب')))));
     if (W.QP.movementHomeCard) view.appendChild(W.QP.movementHomeCard());
     view.appendChild(h('section', { class: 'hero' },
       h('div', { class: 'hero-text' }, h('h1', null, 'منصة ', h('span', { class: 'brand' }, 'المسابقات العلمية')), h('p', null, 'ألعاب ومسابقات في القرآن وعلومه، والحديث الصحيح، والعقيدة، والفقه وأصوله، واللغة، والسيرة، والتراجم، وتاريخ المملكة، وكرة القدم — مع ذكر المصدر لكل سؤال.'),
@@ -115,7 +121,7 @@
       const list = GAMES.filter(g => {
         if (!(!cv || (cv === '__mix' ? g.filter.cats.length > 1 : g.filter.cats.length === 1 && g.filter.cats[0] === cv)) || !(!mv || g.mode === mv) || !(!sv || g.title.includes(sv) || g.desc.includes(sv))) return false;
         const f = W.QP.applyQFilters ? W.QP.applyQFilters(g.filter, fl) : g.filter;
-        const need = g.engine === 'ladder' ? 15 : (g.engine === 'championship' ? 12 : 6);
+        const need = g.mode === 'ladder' ? 15 : (g.engine === 'championship' ? 12 : 6);
         return Bank.count(f) >= need;
       });
       grid.innerHTML = ''; list.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)); list.forEach(g => grid.appendChild(gameCard(g))); count.textContent = fmt(list.length) + ' لعبة';
@@ -135,7 +141,7 @@
     const g = W.QP.game(id); if (!g) { view.appendChild(h('p', null, 'اللعبة غير موجودة. ')); view.appendChild(h('a', { href: '#/games' }, 'دليل الألعاب')); return; }
     setActive('games');
     if (g.rules.daily) { const d = W.QP.LS.get('daily', {}); if (d[W.QP.todayKey()]) { view.appendChild(h('div', { class: 'card center' }, h('h2', null, '📅 أنهيت تحدي اليوم'), h('p', null, 'نتيجتك اليوم: ' + fmt(Math.round(d[W.QP.todayKey()])) + ' نقطة. عد غدًا لتحدٍّ جديد!'), h('a', { class: 'btn primary', href: '#/board?game=daily' }, 'لوحة الصدارة'))); return; } }
-    if (g.engine === 'seenjeem' || g.engine === 'huroof') {
+    if (SELF_SETUP.includes(g.engine)) {
       const root = h('div', { class: 'game-root party-root ' + g.engine + '-root' });
       view.appendChild(root);
       root.appendChild(h('p', { class: 'center muted' }, '⏳ جارٍ التحميل…'));
@@ -187,8 +193,8 @@
     if (!res.multi && !res.study) { rank = Board.add({ game: game.id, title: game.title, player: name, score: Math.round(st.score), correct: st.correct, total: st.log.length, money: !!res.money }); }
     if (res.multi) res.multi.forEach(p => Board.add({ game: game.id, title: game.title, player: p.name, score: Math.round(p.score), correct: p.correct, total: st.log.length }));
     let earned = null;
-    const big = res.championship || res.party;
-    const recScore = rec => big ? Math.min(5000, Math.max(0, Math.round(rec))) : rec;
+    const big = res.championship || res.party || res.capped;
+    const recScore = rec => big ? Math.min(5000, Math.max(0, Math.round(res.recordScore != null ? res.recordScore : rec))) : rec;
     if (!res.multi && !res.study && W.QP.Profiles) earned = W.QP.Profiles.record({ game: game.id, title: game.title, score: recScore(st.score), log: st.log, best: st.best });
     if (res.multi && big && !res.study && W.QP.Profiles) {
       const mine = res.multi.find(p => p.name === (res.hostName || name)) || res.multi.find(p => p.name === name) || res.multi[0];

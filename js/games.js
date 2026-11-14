@@ -16,7 +16,7 @@
     survival: { name: 'النجاة (3 أرواح)', icon: '❤️', engine: 'quiz', desc: 'استمر حتى تفقد أرواحك الثلاث.', types: CHOICE.concat(['fill']), rules: { lives: 3, endless: true, perQ: 20, streak: true } },
     sudden:   { name: 'الموت المفاجئ', icon: '💀', engine: 'quiz', desc: 'خطأ واحد ينهي اللعبة. كم تصمد؟', types: CHOICE, rules: { lives: 1, endless: true, perQ: 15, streak: true } },
     speed:    { name: 'سرعة البديهة', icon: '⏱️', engine: 'quiz', desc: '12 سؤالًا بـ7 ثوانٍ فقط لكل سؤال، النقاط حسب السرعة.', types: ['mcq', 'tf'], rules: { count: 12, perQ: 7, speedBonus: true, speedWeight: 3 } },
-    ladder:   { name: 'من سيربح المليون', icon: '💰', engine: 'ladder', desc: '15 سؤالًا متصاعدة الصعوبة، محطات أمان ووسائل مساعدة.', types: ['mcq'], rules: { steps: 15 } },
+    ladder:   { name: 'من سيربح المليون', icon: '💰', engine: 'millionaire', desc: '15 سؤالًا متصاعدة الصعوبة حتى المليون، محطتا أمان (1,000 و32,000)، حذف إجابتين واتصال بصديق والاستعانة بالجمهور.', types: ['mcq'], rules: { steps: 15 } },
     fill:     { name: 'أكمل الفراغ', icon: '✍️', engine: 'quiz', desc: 'اكتب الإجابة بنفسك.', types: ['fill'], rules: { count: 10, perQ: 45, hints: true } },
     order:    { name: 'رتّب بالتسلسل', icon: '🔢', engine: 'quiz', desc: 'رتّب العناصر بالترتيب الصحيح.', types: ['order'], rules: { count: 6, perQ: 60 } },
     match:    { name: 'صِل الأزواج', icon: '🔗', engine: 'quiz', desc: 'صِل كل عنصر بما يناسبه.', types: ['match'], rules: { count: 6, perQ: 60 } },
@@ -46,7 +46,7 @@
       filter: { cats, subs: extra.subs || null, types: extra.types || m.types, diff: extra.diff || m.diff || null, verifiedOnly: !!m.verifiedOnly, balanceCats: cats.length > 1 },
       rules: Object.assign({}, m.rules, extra.rules || {}) }, extra.title ? { title: extra.title } : {});
   }
-  const minNeeded = g => g.engine === 'ladder' ? 15 : g.rules.count ? Math.min(g.rules.count, 6) : 6;
+  const minNeeded = g => g.mode === 'ladder' ? 15 : g.rules.count ? Math.min(g.rules.count, 6) : 6;
 
   // ---- per-category variants
   Bank.cats.forEach(c => {
@@ -76,7 +76,8 @@
   add(Object.assign(make('championship', ALL, { key: 'grand', title: 'البطولة الكبرى' }), { id: 'championship', icon: '🏆', featured: true, desc: 'خمس جولات حماسية تغطي كل الأقسام الاثني عشر: إحماء، برق، عجلة الأقسام، المهارة، والجولة الذهبية.' }));
   add(Object.assign(make('seenjeem', ALL, { key: 'seenjeem', title: 'سين جيم' }), { id: 'seenjeem', featured: true }));
   add(Object.assign(make('huroof', ALL, { key: 'huroof', title: 'حروف' }), { id: 'huroof', featured: true }));
-  [['classic', ALL, 'الشامل'], ['blitz', ALL, 'الخاطف الشامل'], ['survival', ALL, 'النجاة الشامل'], ['ladder', ALL, 'المليون الشامل'],
+  add(Object.assign(make('ladder', ALL, { key: 'millionaire', title: 'من سيربح المليون' }), { id: 'millionaire', featured: true }));
+  [['classic', ALL, 'الشامل'], ['blitz', ALL, 'الخاطف الشامل'], ['survival', ALL, 'النجاة الشامل'],
    ['teams', ALL, 'مسابقة الفرق الكبرى'], ['duel', ALL, 'تحدي الثنائي الشامل'], ['buzzer', ALL, 'الجرس الشامل'], ['wheel', ALL, 'عجلة الأقسام'],
    ['who', ALL, 'من أنا؟ الشامل'], ['order', ALL, 'ترتيب شامل'], ['match', ALL, 'توصيل شامل'], ['verified', ALL, 'تحدي الموثّق الشامل'],
    ['classic', RELIGIOUS, 'التحدي الشرعي'], ['ladder', RELIGIOUS, 'مليون العلوم الشرعية'], ['teams', RELIGIOUS, 'مسابقة الحلقات الشرعية'],
