@@ -156,3 +156,16 @@ body.proj .bd-bal,body.proj .kit-tsub{font-size:20px}body.proj .bd-quick .chip{f
 .rt-answer{width:100%;text-align:start;background:var(--card);border-radius:12px;padding:8px 14px}.rt-answer ol{margin:4px 0}.rt-answer small{color:var(--muted)}
 body.proj .rt-item{font-size:32px;padding:16px 18px}body.proj .rt-item::before{min-width:44px;height:44px;font-size:24px}body.proj .rt-list{max-width:1100px}body.proj .rt-arrows button{width:56px;height:48px;font-size:22px}body.proj .rt-answer{font-size:24px}
 @media (max-width:600px){.rt-item{font-size:16px;padding:8px}.rt-arrows button{width:32px}body.proj .rt-item{font-size:18px;padding:10px}}
+
+/* ---------- الصندوق الغامض */
+.mx-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:900px;margin:0 auto}
+.mx-grid.n20{grid-template-columns:repeat(5,minmax(0,1fr))}
+.mx-box{font-family:inherit;aspect-ratio:1.25;border-radius:18px;border:3px solid var(--gold);background:linear-gradient(160deg,#8a3df0,#4b1fa8);color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 6px 0 rgba(0,0,0,.35);transition:transform .15s}
+.mx-box:nth-child(3n){background:linear-gradient(160deg,#e8962e,#a85b0c)}.mx-box:nth-child(3n+1){background:linear-gradient(160deg,#1fa3a8,#0b5c60)}
+.mx-box:hover:not(:disabled){transform:translateY(-3px) rotate(-1deg)}
+.mx-gift{font-size:34px;line-height:1}.mx-box b{font-size:22px}
+.mx-box.open{background:var(--card)!important;border-color:var(--line);opacity:.6;box-shadow:none}.mx-open{font-size:30px}
+.mx-stage{max-width:960px;margin:8px auto}
+.mx-reveal{text-align:center}.mx-big{font-size:90px;line-height:1.1;animation:ltPop .5s ease}.mx-reveal h2{margin:4px 0;color:var(--gold);font-size:32px}
+body.proj .mx-grid{max-width:1300px}body.proj .mx-stage{max-width:1400px}body.proj .mx-gift{font-size:56px}body.proj .mx-box b{font-size:34px}body.proj .mx-big{font-size:140px}body.proj .mx-reveal h2{font-size:50px}body.proj .mx-reveal p{font-size:26px}
+@media (max-width:600px){.mx-grid,.mx-grid.n20{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.mx-gift{font-size:24px}.mx-box b{font-size:16px}.mx-box{border-radius:12px}body.proj .mx-gift{font-size:26px}body.proj .mx-box b{font-size:17px}body.proj .mx-big{font-size:80px}body.proj .mx-reveal h2{font-size:26px}}
