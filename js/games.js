@@ -35,6 +35,7 @@
     letters: { name: 'تحدي الحروف', icon: '🔤', engine: 'letters', desc: 'حرف عشوائي كل جولة: سباق إجابات تبدأ بالحرف ثم جولة «عبّي الخانات».', types: ['mcq', 'who', 'fill'], rules: { party: true } },
     memory: { name: 'بطاقة الذاكرة', icon: '🃏', engine: 'memory', desc: 'اقلب بطاقتين وطابق كل سؤال مع جوابه، لاعب واحد أو حتى ٤ بالتناوب.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
     sullam: { name: 'السلم الذهبي', icon: '🪜', engine: 'sullam', desc: 'اصعد درجة مع كل إجابة صحيحة، والدرجات الذهبية محطات أمان، وأول من يصل القمة يفوز.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
+    bidding: { name: 'مزايدة النقاط', icon: '💎', engine: 'bidding', desc: 'يظهر القسم أولًا وتزايد من رصيدك على ثقتك قبل السؤال، والجولة الأخيرة كل شيء أو لا شيء.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
     championship: { name: 'البطولة الكبرى', icon: '🏆', engine: 'championship', desc: 'خمس جولات حماسية تشمل كل الأقسام: إحماء، برق، عجلة، مهارة، والجولة الذهبية بنقاط مضاعفة.', types: ALLQ, rules: { championship: true } }
   };
 
@@ -83,6 +84,7 @@
   add(Object.assign(make('letters', ALL, { key: 'letters', title: 'تحدي الحروف' }), { id: 'letters', featured: true }));
   add(Object.assign(make('memory', ALL, { key: 'memory', title: 'بطاقة الذاكرة' }), { id: 'memory', featured: true }));
   add(Object.assign(make('sullam', ALL, { key: 'sullam', title: 'السلم الذهبي' }), { id: 'sullam', featured: true }));
+  add(Object.assign(make('bidding', ALL, { key: 'bidding', title: 'مزايدة النقاط' }), { id: 'bidding', featured: true }));
   [['classic', ALL, 'الشامل'], ['blitz', ALL, 'الخاطف الشامل'], ['survival', ALL, 'النجاة الشامل'],
    ['teams', ALL, 'مسابقة الفرق الكبرى'], ['duel', ALL, 'تحدي الثنائي الشامل'], ['buzzer', ALL, 'الجرس الشامل'], ['wheel', ALL, 'عجلة الأقسام'],
    ['who', ALL, 'من أنا؟ الشامل'], ['order', ALL, 'ترتيب شامل'], ['match', ALL, 'توصيل شامل'], ['verified', ALL, 'تحدي الموثّق الشامل'],
