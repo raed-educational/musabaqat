@@ -420,4 +420,5 @@
 
   W.QP.ENGINES = { quiz: runQuiz, ladder: runLadder, duel: runDuel, buzzer: runBuzzer, teams: runTeams, study: runStudy };
   W.QP.render = { questionCard, feedback, answerText, sourceBlock };
+  W.QP.Timer = Timer; W.QP.timerBar = timerBar; W.QP.spinWheel = spinWheel;
 })(window);

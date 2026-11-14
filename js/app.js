@@ -22,6 +22,15 @@
     setActive('home');
     const total = Bank.total(); const ver = Bank.cats.reduce((s, c) => s + Bank.countVerified(c.id), 0);
     const nameIn = h('input', { class: 'inp', value: Player.name, placeholder: 'اكتب اسمك يا بطل…', maxlength: 30, oninput: e => { Player.name = e.target.value; } });
+    view.appendChild(h('a', { class: 'champ-banner', href: '#/play/championship' },
+      h('div', { class: 'champ-banner-icon' }, '🏆'),
+      h('div', { class: 'champ-banner-body' },
+        h('div', { class: 'champ-kicker' }, 'المسابقة الشاملة لكل الأقسام'),
+        h('h2', null, 'البطولة الكبرى'),
+        h('p', null, 'خمس جولات حماسية تغطي القرآن والعقيدة والفقه والحديث والسيرة والتراجم واللغة وتاريخ المملكة وكرة القدم — مع عجلة أقسام وجولة ذهبية بنقاط مضاعفة.'),
+        h('div', { class: 'chips' },
+          h('span', { class: 'chip' }, '🌅 إحماء'), h('span', { class: 'chip' }, '⚡ برق'), h('span', { class: 'chip' }, '🎡 عجلة'), h('span', { class: 'chip' }, '🧩 مهارة'), h('span', { class: 'chip' }, '🥇 الجولة الذهبية')),
+        h('span', { class: 'btn primary big' }, '🔥 ابدأ البطولة'))));
     view.appendChild(h('section', { class: 'hero' },
       h('div', { class: 'hero-text' }, h('h1', null, 'منصة ', h('span', { class: 'brand' }, 'المسابقات العلمية')), h('p', null, 'ألعاب ومسابقات في القرآن وعلومه، والحديث الصحيح، والعقيدة، والفقه وأصوله، واللغة، والسيرة، والتراجم، وتاريخ المملكة، وكرة القدم — مع ذكر المصدر لكل سؤال.'),
         h('div', { class: 'stats' }, h('div', null, h('b', null, fmt(total)), h('span', null, 'سؤال')), h('div', null, h('b', null, fmt(GAMES.length)), h('span', null, 'لعبة')), h('div', null, h('b', null, toAr(Bank.cats.length)), h('span', null, 'قسمًا')), h('div', null, h('b', null, fmt(ver)), h('span', null, 'سؤال موثّق آليًا'))),
@@ -79,6 +88,14 @@
     const g = W.QP.game(id); if (!g) { view.appendChild(h('p', null, 'اللعبة غير موجودة. ')); view.appendChild(h('a', { href: '#/games' }, 'دليل الألعاب')); return; }
     setActive('games');
     if (g.rules.daily) { const d = W.QP.LS.get('daily', {}); if (d[W.QP.todayKey()]) { view.appendChild(h('div', { class: 'card center' }, h('h2', null, '📅 أنهيت تحدي اليوم'), h('p', null, 'نتيجتك اليوم: ' + fmt(Math.round(d[W.QP.todayKey()])) + ' نقطة. عد غدًا لتحدٍّ جديد!'), h('a', { class: 'btn primary', href: '#/board?game=daily' }, 'لوحة الصدارة'))); return; } }
+    if (g.engine === 'championship') {
+      const root = h('div', { class: 'game-root champ-root' });
+      view.appendChild(root);
+      root.appendChild(h('p', { class: 'center muted' }, '⏳ جارٍ تحميل الأسئلة…'));
+      Bank.ensure(g.filter.cats).then(() => { root.innerHTML = ''; running = ENGINES.championship(g, root, {}, results) || null; })
+        .catch(() => { root.innerHTML = ''; root.appendChild(h('p', { class: 'center' }, 'تعذّر تحميل ملفات الأسئلة. إن كنت تفتح الملف مباشرة فجرّب عبر خادم أو الرابط المنشور.')); });
+      return;
+    }
     const diffSel = h('select', { class: 'inp' }, h('option', { value: '' }, 'كل المستويات'), [1, 2, 3].map(d => h('option', { value: d, selected: String(params.diff) === String(d) }, DIFF[d])));
     const subs = g.filter.cats.length === 1 ? Bank.subcats(g.filter.cats[0]) : [];
     const subSel = h('select', { class: 'inp' }, h('option', { value: '' }, 'كل الأقسام الفرعية'), subs.filter(([s]) => !g.filter.subs || g.filter.subs.includes(s)).map(([s, n]) => h('option', { value: s, selected: params.sub === s }, s + ' (' + toAr(n) + ')')));
@@ -106,12 +123,22 @@
     if (!res.multi && !res.study) { rank = Board.add({ game: game.id, title: game.title, player: name, score: Math.round(st.score), correct: st.correct, total: st.log.length, money: !!res.money }); }
     if (res.multi) res.multi.forEach(p => Board.add({ game: game.id, title: game.title, player: p.name, score: Math.round(p.score), correct: p.correct, total: st.log.length }));
     let earned = null;
-    if (!res.multi && !res.study && W.QP.Profiles) earned = W.QP.Profiles.record({ game: game.id, title: game.title, score: st.score, log: st.log, best: st.best });
+    const recScore = rec => res.championship ? Math.min(5000, Math.max(0, Math.round(rec))) : rec;
+    if (!res.multi && !res.study && W.QP.Profiles) earned = W.QP.Profiles.record({ game: game.id, title: game.title, score: recScore(st.score), log: st.log, best: st.best });
+    if (res.multi && res.championship && !res.study && W.QP.Profiles) {
+      const mine = res.multi.find(p => p.name === name) || res.multi[0];
+      if (mine) {
+        const log = st.log.filter(l => !l.player || l.player === mine.name);
+        earned = W.QP.Profiles.record({ game: game.id, title: game.title, score: recScore(mine.score), log, best: st.best || mine.best });
+      }
+    }
     if (game.rules.daily) { const d = W.QP.LS.get('daily', {}); d[W.QP.todayKey()] = st.score; W.QP.LS.set('daily', d); }
     const pct = st.log.length ? Math.round(100 * st.correct / st.log.length) : 0;
-    if (pct >= 70) Sound.win();
-    const head = h('div', { class: 'card result' }, h('div', { class: 'intro-icon' }, pct >= 80 ? '🏆' : pct >= 50 ? '🎉' : '💪'), h('h1', null, res.money ? 'ربحت ' + fmt(st.score) + ' ريال افتراضي!' : res.study ? 'انتهت جلسة المراجعة' : 'النتيجة: ' + fmt(Math.round(st.score)) + ' نقطة'),
-      res.multi ? h('div', { class: 'podium' }, res.multi.slice().sort((a, b) => b.score - a.score).map((p, k) => h('div', { class: 'pod p' + k }, h('div', null, ['🥇', '🥈', '🥉'][k] || '🎖'), h('b', null, p.name), h('span', null, fmt(Math.round(p.score)))))) : null,
+    if (res.championship && Sound.fanfare) Sound.fanfare(); else if (pct >= 70) Sound.win();
+    if (res.championship && W.QP.confetti) setTimeout(() => W.QP.confetti(view), 30);
+    const head = h('div', { class: 'card result' + (res.championship ? ' champ-result' : '') }, h('div', { class: 'intro-icon' }, res.championship ? '🏆' : pct >= 80 ? '🏆' : pct >= 50 ? '🎉' : '💪'), h('h1', null, res.money ? 'ربحت ' + fmt(st.score) + ' ريال افتراضي!' : res.study ? 'انتهت جلسة المراجعة' : res.championship ? 'نتيجة البطولة: ' + fmt(Math.round(st.score)) + ' نقطة' : 'النتيجة: ' + fmt(Math.round(st.score)) + ' نقطة'),
+      res.championship && Math.round(st.score) > 5000 ? h('p', { class: 'muted small' }, 'تُحتسب في لوحة الصدارة العامة حتى ٥٠٠٠ نقطة لهذه البطولة.') : null,
+      res.multi ? h('div', { class: 'podium champ-podium' }, res.multi.slice().sort((a, b) => b.score - a.score).map((p, k) => h('div', { class: 'pod p' + k }, h('div', null, ['🥇', '🥈', '🥉'][k] || '🎖'), h('b', null, p.name), h('span', null, fmt(Math.round(p.score)))))) : res.championship ? h('div', { class: 'podium champ-podium' }, h('div', { class: 'pod p0' }, h('div', null, '🥇'), h('b', null, name), h('span', null, fmt(Math.round(st.score))))) : null,
       h('div', { class: 'stats' }, h('div', null, h('b', null, toAr(st.correct)), h('span', null, 'صحيحة')), h('div', null, h('b', null, toAr(st.wrong)), h('span', null, 'خاطئة')), h('div', null, h('b', null, toAr(pct) + '٪'), h('span', null, 'الدقة')), st.best ? h('div', null, h('b', null, toAr(st.best)), h('span', null, 'أطول تتابع')) : null, rank != null ? h('div', null, h('b', null, '#' + toAr(rank + 1)), h('span', null, 'في الصدارة')) : null),
       h('div', { class: 'row center' }, h('a', { class: 'btn primary', href: '#/play/' + encodeURIComponent(game.id) + '?r=' + Date.now() }, '🔁 العب مجددًا'), h('a', { class: 'btn', href: '#/board?game=' + encodeURIComponent(game.id) }, '🏅 لوحة الصدارة'), h('button', { class: 'btn ghost', onclick: share }, '📤 مشاركة النتيجة'), h('a', { class: 'btn ghost', href: '#/' }, '🏠 الرئيسية')));
     function share() { const t = `حصلت على ${Math.round(st.score)} نقطة في «${game.title}» (${st.correct}/${st.log.length}) على منصة المسابقات العلمية! ${location.href.split('#')[0]}#/play/${encodeURIComponent(game.id)}`; if (navigator.share) navigator.share({ text: t }).catch(() => {}); else { navigator.clipboard && navigator.clipboard.writeText(t); alert('تم نسخ النتيجة'); } }

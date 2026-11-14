@@ -29,7 +29,8 @@
     teams:    { name: 'مسابقة الفرق (شاشة المقدم)', icon: '👥', engine: 'teams', desc: 'للحلقات والمدارس والمسابقات: فرق ونقاط وسرقة الإجابة.', types: ALLQ, rules: { rounds: 20, perQ: 30 } },
     study:    { name: 'بطاقات المراجعة', icon: '🗂️', engine: 'study', desc: 'تعلّم بالبطاقات مع الشرح والمصدر.', types: ALLQ, rules: { count: 30 } },
     wheel:    { name: 'عجلة الأقسام', icon: '🎡', engine: 'quiz', desc: 'العجلة تختار القسم قبل كل سؤال!', types: CHOICE, rules: { count: 12, perQ: 20, wheel: true, speedBonus: true } },
-    verified: { name: 'تحدي الموثّق', icon: '🛡️', engine: 'quiz', desc: 'أسئلة جرى التحقق منها آليًا مقابل نص المصدر فقط.', types: ALLQ, verifiedOnly: true, rules: { count: 12, perQ: 25, speedBonus: true } }
+    verified: { name: 'تحدي الموثّق', icon: '🛡️', engine: 'quiz', desc: 'أسئلة جرى التحقق منها آليًا مقابل نص المصدر فقط.', types: ALLQ, verifiedOnly: true, rules: { count: 12, perQ: 25, speedBonus: true } },
+    championship: { name: 'البطولة الكبرى', icon: '🏆', engine: 'championship', desc: 'خمس جولات حماسية تشمل كل الأقسام: إحماء، برق، عجلة، مهارة، والجولة الذهبية بنقاط مضاعفة.', types: ALLQ, rules: { championship: true } }
   };
 
   const RELIGIOUS = ['quran', 'aqeedah', 'fiqh', 'usul', 'hadith', 'sira'];
@@ -70,6 +71,7 @@
   add(make('classic', ['fiqh', 'usul'], { key: 'fiqh-usul', title: 'الفقه وأصوله' }));
   // ---- mixed / cross-category
   const ALL = Bank.cats.map(c => c.id);
+  add(Object.assign(make('championship', ALL, { key: 'grand', title: 'البطولة الكبرى' }), { id: 'championship', icon: '🏆', featured: true, desc: 'خمس جولات حماسية تغطي كل الأقسام الاثني عشر: إحماء، برق، عجلة الأقسام، المهارة، والجولة الذهبية.' }));
   [['classic', ALL, 'الشامل'], ['blitz', ALL, 'الخاطف الشامل'], ['survival', ALL, 'النجاة الشامل'], ['ladder', ALL, 'المليون الشامل'],
    ['teams', ALL, 'مسابقة الفرق الكبرى'], ['duel', ALL, 'تحدي الثنائي الشامل'], ['buzzer', ALL, 'الجرس الشامل'], ['wheel', ALL, 'عجلة الأقسام'],
    ['who', ALL, 'من أنا؟ الشامل'], ['order', ALL, 'ترتيب شامل'], ['match', ALL, 'توصيل شامل'], ['verified', ALL, 'تحدي الموثّق الشامل'],

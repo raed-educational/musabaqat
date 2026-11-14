@@ -107,7 +107,11 @@
     good() { this.beep(660, .12); setTimeout(() => this.beep(880, .18), 110); },
     bad() { this.beep(200, .3, 'sawtooth'); },
     tick() { this.beep(1200, .03, 'square'); },
-    win() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => this.beep(f, .2), i * 130)); }
+    win() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => this.beep(f, .2), i * 130)); },
+    count() { this.beep(392, .12, 'sine'); },
+    go() { this.beep(784, .22, 'sine'); },
+    combo() { this.beep(880, .08); setTimeout(() => this.beep(1174, .14), 90); },
+    fanfare() { [523, 659, 784, 1047, 784, 1319].forEach((f, i) => setTimeout(() => this.beep(f, .2), i * 120)); }
   };
 
   // ---------- DOM helper
