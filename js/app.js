@@ -42,6 +42,7 @@
         h('div', { class: 'party-body' }, h('div', { class: 'champ-kicker' }, 'خلية الحروف'), h('h2', null, 'حروف'),
           h('p', null, 'لوحة سداسية من ٢٥ حرفًا: الأخضر يصل اليمين باليسار، والبرتقالي يصل الأعلى بالأسفل. كل حرف وراه سؤال جوابه يبدأ به.'),
           h('span', { class: 'btn primary' }, '▶ العب حروف')))));
+    if (W.QP.movementHomeCard) view.appendChild(W.QP.movementHomeCard());
     view.appendChild(h('section', { class: 'hero' },
       h('div', { class: 'hero-text' }, h('h1', null, 'منصة ', h('span', { class: 'brand' }, 'المسابقات العلمية')), h('p', null, 'ألعاب ومسابقات في القرآن وعلومه، والحديث الصحيح، والعقيدة، والفقه وأصوله، واللغة، والسيرة، والتراجم، وتاريخ المملكة، وكرة القدم — مع ذكر المصدر لكل سؤال.'),
         h('div', { class: 'stats' }, h('div', null, h('b', null, fmt(total)), h('span', null, 'سؤال')), h('div', null, h('b', null, fmt(GAMES.length)), h('span', null, 'لعبة')), h('div', null, h('b', null, toAr(Bank.cats.length)), h('span', null, 'قسمًا')), h('div', null, h('b', null, fmt(ver)), h('span', null, 'سؤال موثّق آليًا'))),
@@ -264,7 +265,7 @@
     else if (p0 === 'board') board(params); else if (p0 === 'about') about();
     else if (p0 === 'global') { setActive('global'); W.QP.globalPage(view, r => { running = r; }, params); }
     else if (p0 === 'profile') { setActive('profile'); W.QP.profilePage(view); }
-    else if (p0 === 'online') { setActive('online'); W.QP.onlinePage(view, parts, r => { running = r; }); } else home();
+    else if (p0 === 'online') { setActive('online'); W.QP.onlinePage(view, parts, r => { running = r; }); } else if (p0 === 'movement') { setActive('movement'); running = (W.QP.movementPage && W.QP.movementPage(view, parts, params)) || null; } else home();
   }
   W.addEventListener('hashchange', route);
   const snd = document.getElementById('soundBtn');
