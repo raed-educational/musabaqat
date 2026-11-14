@@ -14,8 +14,8 @@
   const S = 50, HW = Math.sqrt(3) * S; // hex radius / width (pointy-top)
   let dataP = null;
   function loadData() {
-    if (W.HUROOF_Q) return Promise.resolve();
-    return dataP = dataP || new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'data/huroof.js'; s.onload = res; s.onerror = () => { dataP = null; rej(new Error('huroof data')); }; document.head.appendChild(s); });
+    if (W.HUROOF_Q && W.HUROOF_SCHOOL) return Promise.resolve();
+    return dataP = dataP || new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'data/huroof.js'; s.onload = () => { const t = document.createElement('script'); t.src = 'data/huroof-school.js'; t.onload = res; t.onerror = res; document.head.appendChild(t); }; s.onerror = () => { dataP = null; rej(new Error('huroof data')); }; document.head.appendChild(s); });
   }
   // odd-r offset layout: odd rows shifted half a hex to the right
   function neighbors(r, c) {
@@ -47,7 +47,8 @@
     const rows = (W.HUROOF_Q && W.HUROOF_Q[L]) || [];
     const fl = cfg.filters || {};
     const layers = [
-      r => cfg.cats.includes(r[1]) && (!fl.diff || r[2] === fl.diff) && (!fl.stage || r[3] === fl.stage),
+      r => cfg.cats.includes(r[1]) && (!fl.diff || r[2] === fl.diff) && (!fl.stage || r[3] === fl.stage) && (!(fl.stage === 'mutawassit' && fl.diff === 1) || r[9] === 1),
+      r => (fl.stage === 'mutawassit' && fl.diff === 1) && r[9] === 1,
       r => cfg.cats.includes(r[1]) && (!fl.diff || r[2] === fl.diff),
       r => cfg.cats.includes(r[1]),
       () => true

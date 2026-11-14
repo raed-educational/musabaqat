@@ -51,7 +51,7 @@
   function make(modeId, cats, extra) {
     const m = MODES[modeId]; extra = extra || {};
     return Object.assign({ id: modeId + '-' + (extra.key || cats.join('+')), mode: modeId, name: m.name, icon: m.icon, engine: m.engine, desc: m.desc,
-      filter: { cats, subs: extra.subs || null, types: extra.types || m.types, diff: extra.diff || m.diff || null, verifiedOnly: !!m.verifiedOnly, balanceCats: cats.length > 1 },
+      filter: Object.assign({ cats, subs: extra.subs || null, types: extra.types || m.types, diff: extra.diff || m.diff || null, verifiedOnly: !!m.verifiedOnly, balanceCats: cats.length > 1 }, extra.book ? { book: extra.book } : {}),
       rules: Object.assign({}, m.rules, extra.rules || {}) }, extra.title ? { title: extra.title } : {});
   }
   const minNeeded = g => g.mode === 'ladder' ? 15 : g.rules.count ? Math.min(g.rules.count, 6) : 6;
@@ -64,6 +64,10 @@
     Bank.subcats(c.id).filter(([, n]) => n >= 12).slice(0, 4).forEach(([sub]) =>
       add(make('classic', [c.id], { key: c.id + ':' + sub, subs: [sub], title: 'مسابقة ' + sub + ' — ' + c.name })));
   });
+  // ---- «كتاب القيم القرآنية» (أسئلة سهلة للمرحلة المتوسطة من كتاب صاحب المنصة) — من الكتاب فقط
+  const BOOK_CATS = ['aqeedah', 'fiqh', 'quran', 'hadith'];
+  [['classic', 'مسابقة كتاب القيم القرآنية', { count: 15 }], ['tf', 'صح أم خطأ — كتاب القيم القرآنية', null], ['teams', 'مسابقة الفرق — كتاب القيم القرآنية', null], ['ladder', 'من سيربح المليون — كتاب القيم القرآنية', null], ['study', 'بطاقات مراجعة كتاب القيم القرآنية', null], ['survival', 'النجاة — كتاب القيم القرآنية', null]]
+    .forEach(([mid, title, rules]) => add(make(mid, BOOK_CATS, { key: 'qiyam', book: 'qiyam', title, types: mid === 'tf' ? ['tf'] : (mid === 'ladder' ? ['mcq'] : ['mcq', 'tf']), rules: Object.assign({}, rules || {}) })));
   // ---- special Quran / Hadith games
   add(make('who', ['quran'], { key: 'guess-surah', subs: ['تحديد السورة'], types: ['who', 'mcq'], title: 'خمّن السورة', rules: { count: 10 } }));
   add(make('classic', ['quran'], { key: 'complete-ayah', subs: ['أكمل الآية'], types: ['mcq'], title: 'أكمل الآية' }));

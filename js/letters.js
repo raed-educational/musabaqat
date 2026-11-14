@@ -17,8 +17,8 @@
   const firstL = s => { let x = strip(s).replace(/^ال(?=..)/, ''); const c = x[0] || ''; return c.replace(/[أإآٱء]/, 'ا').replace('ى', 'ي').replace('ة', 'ه'); };
   let dataP = null;
   function loadData() {
-    if (W.HUROOF_Q) return Promise.resolve();
-    return dataP = dataP || new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'data/huroof.js'; s.onload = res; s.onerror = () => { dataP = null; rej(new Error('letters')); }; document.head.appendChild(s); });
+    if (W.HUROOF_Q && W.HUROOF_SCHOOL) return Promise.resolve();
+    return dataP = dataP || new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'data/huroof.js'; s.onload = () => { const t = document.createElement('script'); t.src = 'data/huroof-school.js'; t.onload = res; t.onerror = res; document.head.appendChild(t); }; s.onerror = () => { dataP = null; rej(new Error('letters')); }; document.head.appendChild(s); });
   }
 
   function run(game, root, opts, finish) {
@@ -58,7 +58,8 @@
 
       function pick(L) {
         const rows = rowsFor(L);
-        const layers = [r => okRow(r) && (!fl.diff || r[2] === fl.diff) && (!fl.stage || r[3] === fl.stage), r => okRow(r) && (!fl.diff || r[2] === fl.diff), okRow, () => true];
+        const sch = fl.stage === 'mutawassit' && fl.diff === 1;
+        const layers = [r => okRow(r) && (!fl.diff || r[2] === fl.diff) && (!fl.stage || r[3] === fl.stage) && (!sch || r[9] === 1), r => sch && r[9] === 1, r => okRow(r) && (!fl.diff || r[2] === fl.diff), okRow, () => true];
         for (const f of layers) { const l = rows.filter(r => f(r) && !used.has(r[0])); if (l.length) { const r = l[Math.floor(Math.random() * l.length)]; used.add(r[0]); return { id: r[0], category: r[1], difficulty: r[2], stage: r[3], question: r[4], answer: r[5], accept: [r[5]], type: 'fill', clues: r[6] || null, source: r[7], subcategory: r[8] }; } }
         return null;
       }

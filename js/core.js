@@ -34,21 +34,26 @@
   const loading = {};
   let _all = null;
   function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('failed ' + src)); document.head.appendChild(s); }); }
+  // «متوسط + سهل» = المجموعة المنهجية المخصصة فقط (curated:'school')، دون تغيير أي سؤال قديم
+  function schoolOnly(f) { const d = f && f.diff; return !!f && f.stage === 'mutawassit' && (Array.isArray(d) ? (d.length === 1 && +d[0] === 1) : +d === 1); }
+  W.QP_schoolOnly = schoolOnly;
   function match(q, f) {
     const st = q.stage || (W.quizStageOf && W.quizStageOf(q));
+    if (schoolOnly(f) && q.curated !== 'school') return false;
     return (!f.cats || !f.cats.length || f.cats.includes(q.category)) &&
       (!f.subs || !f.subs.length || f.subs.includes(q.subcategory)) &&
       (!f.types || !f.types.length || f.types.includes(q.type)) &&
       (!f.diff || (Array.isArray(f.diff) ? f.diff.includes(+q.difficulty) : +q.difficulty === +f.diff)) &&
       (!f.stage || st === f.stage) &&
-      (!f.verifiedOnly || q.verified);
+      (!f.verifiedOnly || q.verified) &&
+      (!f.book || q.book === f.book);
   }
   const Bank = {
     cats: CATS, cat: id => catById[id], manifest: MAN,
     loaded(id) { return !!W.QUIZ_BANK[id]; },
     ensure(ids) {
       ids = (ids && ids.length ? ids : CATS.map(c => c.id)).filter(id => !W.QUIZ_BANK[id]);
-      return Promise.all(ids.map(id => loading[id] = loading[id] || loadScript('data/bank/' + id + '.js'))).then(() => { _all = null; });
+      return Promise.all(ids.map(id => loading[id] = loading[id] || Promise.all([loadScript('data/bank/' + id + '.js'), loadScript('data/school/' + id + '.js').catch(() => null)]))).then(() => { _all = null; });
     },
     custom() { return LS.get('custom', []); },
     saveCustom(list) { LS.set('custom', list); _all = null; },
@@ -57,7 +62,7 @@
     all() {
       if (_all) return _all;
       const del = new Set(this.deleted()); const custom = this.custom(); const cid = new Set(custom.map(q => q.id));
-      const base = []; Object.values(W.QUIZ_BANK).forEach(list => list.forEach(q => { if (!del.has(q.id) && !cid.has(q.id)) base.push(q); }));
+      const base = []; [W.QUIZ_BANK, W.QUIZ_SCHOOL || {}].forEach(B => Object.values(B).forEach(list => list.forEach(q => { if (!del.has(q.id) && !cid.has(q.id)) base.push(q); })));
       _all = base.concat(custom.filter(q => !del.has(q.id)));
       if (W.quizStageOf) _all.forEach(q => { q.stage = W.quizStageOf(q); });
       return _all;
@@ -68,16 +73,17 @@
     count(f) {
       f = f || {}; let n = 0;
       const MANIFEST = f.stage ? (W.QUIZ_STAGE_MANIFEST || {}) : MAN;
+      const SCH = W.QUIZ_SCHOOL_MANIFEST || {};
       CATS.forEach(c => {
         if (f.cats && f.cats.length && !f.cats.includes(c.id)) return;
-        Object.entries(MANIFEST[c.id] || {}).forEach(([k, v]) => { const [sub, type, diff, ver, stage] = k.split('|'); if (match({ category: c.id, subcategory: sub, type, difficulty: +diff, verified: ver === '1', stage: stage || undefined }, f)) n += v; });
+        [MANIFEST, SCH].forEach(M => Object.entries(M[c.id] || {}).forEach(([k, v]) => { const [sub, type, diff, ver, stage, cur, book] = k.split('|'); if (match({ category: c.id, subcategory: sub, type, difficulty: +diff, verified: ver === '1', stage: (M === SCH || f.stage) ? stage : undefined, curated: cur || undefined, book: book || undefined }, f)) n += v; }));
       });
       this.custom().forEach(q => { if (match(q, f)) n++; });
       return n;
     },
     countVerified(cat) { let n = 0; Object.entries(MAN[cat] || {}).forEach(([k, v]) => { if (k.endsWith('|1')) n += v; }); return n; },
-    subcats(id) { const m = {}; Object.entries(MAN[id] || {}).forEach(([k, v]) => { const s = k.split('|')[0]; m[s] = (m[s] || 0) + v; }); this.custom().forEach(q => { if (q.category === id) m[q.subcategory] = (m[q.subcategory] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); },
-    diffCounts(id) { const m = { 1: 0, 2: 0, 3: 0 }; Object.entries(MAN[id] || {}).forEach(([k, v]) => { m[k.split('|')[2]] += v; }); return m; },
+    subcats(id) { const m = {}; Object.entries(Object.assign({}, MAN[id] || {}, (W.QUIZ_SCHOOL_MANIFEST || {})[id] || {})).forEach(([k, v]) => { const s = k.split('|')[0]; m[s] = (m[s] || 0) + v; }); this.custom().forEach(q => { if (q.category === id) m[q.subcategory] = (m[q.subcategory] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); },
+    diffCounts(id) { const m = { 1: 0, 2: 0, 3: 0 }; Object.entries(Object.assign({}, MAN[id] || {}, (W.QUIZ_SCHOOL_MANIFEST || {})[id] || {})).forEach(([k, v]) => { m[k.split('|')[2]] += v; }); return m; },
     filter(f) { f = f || {}; return this.all().filter(q => match(q, f)); },
     pick(f, n, rnd) {
       let list = shuffle(this.filter(f), rnd);

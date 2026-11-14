@@ -43,6 +43,7 @@
 
   function stageOf(q) {
     if (!q) return 'mutawassit';
+    if (q.curated === 'school') return LABELS[q.level] ? q.level : 'mutawassit';
     const d = +q.difficulty || 2;
     const typ = q.type || 'mcq';
     const len = String(q.question || '').length;
@@ -124,6 +125,8 @@
     const start = Object.assign({}, filter || {});
     const attempts = [
       [Object.assign({}, start), null],
+      // «متوسط + سهل»: نبقى داخل المجموعة المنهجية أولًا (بدون تقييد القسم الفرعي) قبل أي استكمال
+      [Object.assign({}, start, { subs: null }), null],
       [Object.assign({}, start, { stage: null }), start.stage ? 'stage' : null],
       [Object.assign({}, start, { stage: null, diff: null }), (start.stage && start.diff) ? 'stage,diff' : start.diff ? 'diff' : start.stage ? 'stage' : null]
     ];
@@ -132,6 +135,7 @@
       const ff = attempts[i][0];
       if (ff.stage == null) delete ff.stage;
       if (ff.diff == null) delete ff.diff;
+      if (ff.subs == null) delete ff.subs;
       const list = Bank.pick(ff, 0, rnd);
       best = list; relaxed = attempts[i][1];
       if (list.length >= min) break;
@@ -163,6 +167,12 @@
         const on = (v === '' && !fl.stage) || fl.stage === v;
         stRow.appendChild(h('button', { type: 'button', class: 'chip' + (on ? ' on' : ''), onclick: () => { setFilters({ stage: v || null }); draw(); opts.onChange && opts.onChange(getFilters()); } }, lab));
       });
+      // زر واضح للمجموعة المنهجية السهلة المخصصة للمرحلة المتوسطة
+      const schoolOn = fl.stage === 'mutawassit' && fl.diff === 1;
+      const nSchool = (W.QP && W.QP.Bank) ? W.QP.Bank.count({ stage: 'mutawassit', diff: [1] }) : 0;
+      box.appendChild(h('button', { type: 'button', class: 'qf-school' + (schoolOn ? ' on' : ''), id: 'qfSchool', onclick: () => { if (schoolOn) setFilters({ stage: null, diff: null }); else setFilters({ stage: 'mutawassit', diff: 1 }); draw(); opts.onChange && opts.onChange(getFilters()); } },
+        h('span', { class: 'qf-school-i' }, '🎒'),
+        h('span', null, h('b', null, schoolOn ? '✔ أسئلة المرحلة المتوسطة السهلة مفعّلة' : 'أسئلة المرحلة المتوسطة السهلة'), h('small', null, (nSchool ? nSchool.toLocaleString('ar-SA') + ' سؤال ' : '') + 'من منهج المتوسط وكتاب القيم القرآنية — اضغط ' + (schoolOn ? 'لإلغائها' : 'لتفعيلها')))));
       box.appendChild(diffRow);
       box.appendChild(stRow);
     }

@@ -54,6 +54,17 @@
         h('div', { class: 'party-body' }, h('div', { class: 'champ-kicker' }, 'خلية الحروف'), h('h2', null, 'حروف'),
           h('p', null, 'لوحة سداسية من ٢٥ حرفًا: الأخضر يصل اليمين باليسار، والبرتقالي يصل الأعلى بالأسفل. كل حرف وراه سؤال جوابه يبدأ به.'),
           h('span', { class: 'btn primary' }, '▶ العب حروف')))));
+    view.appendChild(h('div', { class: 'party-row school-row' },
+      h('a', { class: 'party-banner', id: 'homeSchool', href: '#/games', onclick: () => { if (W.QP.setQFilters) W.QP.setQFilters({ stage: 'mutawassit', diff: 1 }); } },
+        h('div', { class: 'party-icon' }, '🎒'),
+        h('div', { class: 'party-body' }, h('div', { class: 'champ-kicker' }, 'مخصصة لطلاب المرحلة المتوسطة'), h('h2', null, 'أسئلة المتوسط السهلة'),
+          h('p', null, 'أسئلة سهلة وواضحة من منهج المرحلة المتوسطة وكتاب القيم القرآنية، تشتغل في كل الألعاب عند اختيار «متوسط» و«سهل».'),
+          h('span', { class: 'btn primary' }, '▶ فعّلها والعب'))),
+      W.QP.game('classic-qiyam') ? h('a', { class: 'party-banner', id: 'homeQiyam', href: '#/play/classic-qiyam' },
+        h('div', { class: 'party-icon' }, '📗'),
+        h('div', { class: 'party-body' }, h('div', { class: 'champ-kicker' }, 'من الكتاب فقط'), h('h2', null, 'كتاب القيم القرآنية'),
+          h('p', null, 'أسئلة من قيم الكتاب: عقيدتي، صلاتي، كتاب ربي، أذكاري، والديّ، آدابي، رمضاني.'),
+          h('span', { class: 'btn primary' }, '▶ العب من الكتاب'))) : null));
     view.appendChild(h('div', { class: 'flag-grid' }, FLAGSHIP.filter(f => W.QP.game(f[0])).map(([id, icon, title, desc]) => h('a', { class: 'flag-card', id: 'flag-' + id, href: '#/play/' + id },
       h('div', { class: 'flag-icon' }, icon), h('div', { class: 'flag-body' }, h('h3', null, title), h('p', null, desc)), h('span', { class: 'btn primary small' }, '▶ العب')))));
     if (W.QP.movementHomeCard) view.appendChild(W.QP.movementHomeCard());

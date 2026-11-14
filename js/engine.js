@@ -108,6 +108,8 @@
   function sourceBlock(q) {
     const lvl = q.verificationLevel || (q.verified ? 'primary' : 'none');
     const badge = lvl === 'primary' ? h('span', { class: 'badge ok', title: q.verifiedAgainst || '' }, '✔ موثّق آليًا من نص المصدر')
+      : lvl === 'book' ? h('span', { class: 'badge ok' }, '📗 من كتاب القيم القرآنية')
+      : lvl === 'school' ? h('span', { class: 'badge ref' }, '📘 من منهج المرحلة المتوسطة')
       : lvl === 'reference' ? h('span', { class: 'badge ref', title: q.verifiedAgainst || '' }, '🔗 مأخوذ من مرجع مفتوح')
       : h('span', { class: 'badge pending' }, '⏳ بانتظار المراجعة العلمية');
     return h('div', { class: 'source' }, h('div', null, h('b', null, 'المصدر: '), q.source || '—'), badge);
