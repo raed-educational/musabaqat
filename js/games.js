@@ -33,6 +33,7 @@
     seenjeem: { name: 'سين جيم', icon: '🟧', engine: 'seenjeem', desc: 'لوحة ٦ فئات و٣٦ سؤالًا (٢٠٠/٤٠٠/٦٠٠) بين فريقين، مع وسائل المساعدة: الحفرة، جاوب جوابين، اتصال بصديق، استريح، الفخ.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
     huroof: { name: 'حروف', icon: '🐝', engine: 'huroof', desc: 'خلية الحروف السداسية: الأخضر يصل اليمين باليسار والبرتقالي يصل الأعلى بالأسفل، وكل حرف وراه سؤال جوابه يبدأ به.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
     letters: { name: 'تحدي الحروف', icon: '🔤', engine: 'letters', desc: 'حرف عشوائي كل جولة: سباق إجابات تبدأ بالحرف ثم جولة «عبّي الخانات».', types: ['mcq', 'who', 'fill'], rules: { party: true } },
+    memory: { name: 'بطاقة الذاكرة', icon: '🃏', engine: 'memory', desc: 'اقلب بطاقتين وطابق كل سؤال مع جوابه، لاعب واحد أو حتى ٤ بالتناوب.', types: ['mcq', 'who', 'fill'], rules: { party: true } },
     championship: { name: 'البطولة الكبرى', icon: '🏆', engine: 'championship', desc: 'خمس جولات حماسية تشمل كل الأقسام: إحماء، برق، عجلة، مهارة، والجولة الذهبية بنقاط مضاعفة.', types: ALLQ, rules: { championship: true } }
   };
 
@@ -79,6 +80,7 @@
   add(Object.assign(make('huroof', ALL, { key: 'huroof', title: 'حروف' }), { id: 'huroof', featured: true }));
   add(Object.assign(make('ladder', ALL, { key: 'millionaire', title: 'من سيربح المليون' }), { id: 'millionaire', featured: true }));
   add(Object.assign(make('letters', ALL, { key: 'letters', title: 'تحدي الحروف' }), { id: 'letters', featured: true }));
+  add(Object.assign(make('memory', ALL, { key: 'memory', title: 'بطاقة الذاكرة' }), { id: 'memory', featured: true }));
   [['classic', ALL, 'الشامل'], ['blitz', ALL, 'الخاطف الشامل'], ['survival', ALL, 'النجاة الشامل'],
    ['teams', ALL, 'مسابقة الفرق الكبرى'], ['duel', ALL, 'تحدي الثنائي الشامل'], ['buzzer', ALL, 'الجرس الشامل'], ['wheel', ALL, 'عجلة الأقسام'],
    ['who', ALL, 'من أنا؟ الشامل'], ['order', ALL, 'ترتيب شامل'], ['match', ALL, 'توصيل شامل'], ['verified', ALL, 'تحدي الموثّق الشامل'],
