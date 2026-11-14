@@ -141,3 +141,18 @@ body.proj .sl-stage{grid-template-columns:minmax(0,1fr) 320px}body.proj .sl-rung
 .bd-deltas{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:22px;font-weight:800;width:100%}.bd-deltas .good{color:var(--good)}.bd-deltas .bad{color:var(--bad)}
 body.proj .bd-cat-name{font-size:56px}body.proj .bd-val{font-size:72px}body.proj .bd-tname{font-size:30px}body.proj .bd-mark{font-size:30px}body.proj .bd-deltas{font-size:32px}
 body.proj .bd-bal,body.proj .kit-tsub{font-size:20px}body.proj .bd-quick .chip{font-size:22px;padding:6px 16px}body.proj .bd-diff{font-size:26px}body.proj .champ-kicker{font-size:22px}
+
+/* ---------- رتّب الإجابة */
+.rt-card .q-text{text-align:center}
+.rt-ends{text-align:center;color:var(--muted);font-size:13px;margin:4px 0}
+.rt-list{list-style:none;margin:0 auto;padding:0;display:flex;flex-direction:column;gap:8px;max-width:760px;counter-reset:rt}
+.rt-item{counter-increment:rt;display:flex;align-items:center;gap:10px;background:var(--card2);border:2px solid var(--line);border-radius:14px;padding:10px 12px;font-size:20px;font-weight:700;cursor:grab;touch-action:none;user-select:none;transition:background .15s,box-shadow .15s}
+.rt-item::before{content:counter(rt,arabic-indic);min-width:30px;height:30px;border-radius:50%;background:var(--pri);color:#1b1205;display:flex;align-items:center;justify-content:center;font-size:16px}
+.rt-item.drag{cursor:grabbing;background:#165a61;box-shadow:0 10px 26px rgba(0,0,0,.5);border-color:var(--gold);transform:scale(1.02)}
+.rt-grip{color:var(--muted);font-size:18px}.rt-txt{flex:1}
+.rt-arrows{display:flex;gap:4px}.rt-arrows button{font-family:inherit;width:38px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:#fff;cursor:pointer}
+.rt-item.ok{border-color:var(--good);background:rgba(79,208,138,.18)}.rt-item.no{border-color:var(--bad);background:rgba(255,122,107,.15)}
+.rt-list.locked .rt-item{cursor:default}
+.rt-answer{width:100%;text-align:start;background:var(--card);border-radius:12px;padding:8px 14px}.rt-answer ol{margin:4px 0}.rt-answer small{color:var(--muted)}
+body.proj .rt-item{font-size:32px;padding:16px 18px}body.proj .rt-item::before{min-width:44px;height:44px;font-size:24px}body.proj .rt-list{max-width:1100px}body.proj .rt-arrows button{width:56px;height:48px;font-size:22px}body.proj .rt-answer{font-size:24px}
+@media (max-width:600px){.rt-item{font-size:16px;padding:8px}.rt-arrows button{width:32px}body.proj .rt-item{font-size:18px;padding:10px}}
