@@ -115,7 +115,7 @@ textarea.code{font-family:monospace;font-size:12px;direction:ltr;margin-top:10px
 .switch-row{flex-direction:row;align-items:center;gap:10px;color:#fff;font-size:16px}.switch-row input{width:20px;height:20px}.lb-opt{margin-top:16px}
 /* ---------- branding ---------- */
 /* official logo: transparent PNG made from the official JPG (only the black background removed), shown unchanged */
-.brand-logo{height:52px;width:auto;display:block;flex:none;filter:none}.logo{gap:10px}
+.brand-logo{height:60px;width:auto;display:block;flex:none;filter:none}.logo{gap:10px}
 .hero-art{animation:none;filter:none;font-size:0}.hero-logo{display:block;width:100%;height:auto;max-width:420px;margin:0 auto}
 .top-tools{display:flex;gap:6px;align-items:center;flex:none}.icon-btn.on{background:var(--gold);color:#000;border-color:transparent}
 /* ---------- responsive ---------- */
@@ -124,7 +124,7 @@ img,svg,video{max-width:100%}
 .container{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
 @media (max-width:760px){.hero-art{display:block;order:-1}.hero-logo{max-width:300px}}
 @media (max-width:600px){
-  .brand-logo{height:44px}.logo span{font-size:16px}.top-tools{margin-inline-start:auto}.icon-btn{margin-inline-start:0}
+  .brand-logo{height:50px}.logo span{font-size:16px}.top-tools{margin-inline-start:auto}.icon-btn{margin-inline-start:0}
   table.board{display:block;overflow-x:auto;white-space:nowrap}
   .container{padding:12px 10px 50px}.card{padding:16px}h1{font-size:25px}.section-title{font-size:21px}
   .hero{padding:18px;border-radius:18px}.hero h1{font-size:26px}.hero p{font-size:16px}
