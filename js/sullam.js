@@ -21,7 +21,7 @@
     function begin(cfg) {
       const P = K().picker({ cats: cfg.cats, types: ['mcq'], filters: cfg.filters, test: K().MCQ });
       const teams = cfg.names.map(name => ({ name, score: 0, pos: 0, safe: 0, correct: 0 }));
-      const log = []; let turn = 0;
+      const log = []; let turn = 0, swapCount = 0, forcedQ = null;
       const isGold = s => s > 0 && s % 5 === 0;
       function ladder() {
         const L = h('div', { class: 'sl-ladder' });
@@ -37,7 +37,7 @@
         if (timer) timer.stop();
         const t = teams[turn];
         const frac = t.pos / steps; const d = frac < 0.34 ? 1 : frac < 0.67 ? 2 : 3;
-        const q = P.next(d);
+        const q = forcedQ || P.next(d); forcedQ = null;
         wrap.innerHTML = ''; W.scrollTo(0, 0);
         const note = P.note(); if (note) wrap.appendChild(h('div', { class: 'filter-note' }, note));
         wrap.appendChild(K().scores(teams, turn, { sub: p => 'الدرجة ' + toAr(p.pos) + ' / ' + toAr(steps) }));
@@ -47,10 +47,16 @@
         const M = K().mcq(q, i => answer(i));
         const side = h('div', { class: 'sl-q' }, h('div', { class: 'kit-turn' }, '🎯 دور ', h('b', { style: 'color:' + K().COLORS[turn] }, t.name), ' — على الدرجة ' + toAr(t.pos)), tb.el, M.el, msg, ctrl);
         wrap.appendChild(h('div', { class: 'sl-stage' }, side, ladder()));
+        wrap.querySelector('.sl-q').appendChild(W.QP.Swap.bar(() => {
+          if (done || ended) return; if (timer) timer.stop();
+          const nq = W.QP.Swap.pick({ used: P.used, current: q, types: ['mcq'], cats: cfg.cats, category: q.category, test: K().MCQ });
+          if (!nq) return; swapCount++; forcedQ = nq; show();
+        }, swapCount));
         timer = K().timer(secs, tb, () => answer(null));
         let done = false;
         function answer(i) {
           if (done) return; done = true; if (timer) timer.stop();
+          W.QP.Swap.hide(wrap);
           M.lock(); M.show(i);
           const ok = i === q.answer;
           log.push({ q, res: { correct: ok, timeout: i == null }, pts: 0, player: t.name });

@@ -29,7 +29,7 @@
       const nS = Math.round(nBoxes * 0.3);
       const vals = [100, 200, 300, 400, 500];
       const boxes = shuffle([...Array(nBoxes - nS)].map((_, i) => ({ kind: 'q', v: vals[i % 5] })).concat([...Array(nS)].map((_, i) => ({ kind: 's', s: SURPRISES[i % SURPRISES.length] }))));
-      const log = []; let turn = 0;
+      const log = []; let turn = 0, swapCount = 0;
       function board(msg) {
         if (ended) return;
         if (timer) timer.stop();
@@ -81,7 +81,7 @@
           return;
         }
         const d = b.v <= 200 ? 1 : b.v <= 300 ? 2 : 3;
-        const q = P.next(d);
+        let q = P.next(d);
         const c = Bank.cat(q.category) || {};
         stage.appendChild(h('div', { class: 'mx-reveal' }, h('div', { class: 'mx-big' }, '❓'), h('h2', null, 'سؤال بقيمة ' + K().fmt(b.v)), h('p', null, 'القسم: ' + (c.icon || '') + ' ' + (c.name || '') + ' — قرروا قبل رؤية السؤال:')));
         stage.appendChild(h('div', { class: 'kit-ctrl' },
@@ -93,10 +93,16 @@
           const M = K().mcq(q, k => answer(k));
           stage.appendChild(h('div', { class: 'kit-turn' }, (mult === 2 ? '🔥 مخاطرة ×٢ — ' : '🛡 ') + t.name + ' — ' + K().fmt(b.v * mult)));
           stage.appendChild(tb.el); stage.appendChild(M.el); stage.appendChild(msg); stage.appendChild(ctrl);
+          stage.appendChild(W.QP.Swap.bar(() => {
+            if (done || ended) return; if (timer) timer.stop();
+            const nq = W.QP.Swap.pick({ used: P.used, current: q, types: ['mcq'], cats: cfg.cats, category: q.category, test: K().MCQ });
+            if (!nq) return; swapCount++; q = nq; ask(mult);
+          }, swapCount));
           timer = K().timer(30, tb, () => answer(null));
           let done = false;
           function answer(k) {
             if (done) return; done = true; timer.stop(); M.lock(); M.show(k);
+            W.QP.Swap.hide(stage);
             const ok = k === q.answer; let pts = 0;
             if (ok) { pts = b.v * mult; t.score += pts; t.correct++; b.by = turn; Sound.good(); }
             else { if (mult === 2) { pts = -b.v; t.score += pts; } Sound.bad(); }

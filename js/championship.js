@@ -158,6 +158,8 @@
       const players = names.map((name, i) => ({ name, score: 0, correct: 0, wrong: 0, streak: 0, best: 0, prevRank: i }));
       const st = { i: 0, score: 0, correct: 0, wrong: 0, streak: 0, best: 0, log: [], start: Date.now(), roundPts: [] };
       let rIdx = 0, qIdx = 0, turn = 0, prevRanks = players.map((_, i) => i);
+      const usedIds = new Set(); rounds.forEach(rr => rr.qs.forEach(q => { if (q && q.id) usedIds.add(q.id); }));
+      let swapCount = 0, swapping = false;
 
       function ranked() { return players.slice().sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ar')); }
 
@@ -250,17 +252,27 @@
           cur = { q, answered: false };
           const { card, ctrl } = questionCard(q, res => onAnswer(round, q, res, (Date.now() - t0) / 1000, tb), { rnd: Math.random, perQ: round.perQ });
           cur.ctrl = ctrl; stage.appendChild(card);
+          stage.appendChild(W.QP.Swap.bar(() => {
+            if (!cur || cur.answered || ended) return;
+            if (perT) { perT.stop(); perT = null; }
+            if (cur.ctrl && cur.ctrl.cleanup) cur.ctrl.cleanup();
+            const nq = W.QP.Swap.pick({ used: usedIds, current: q, types: round.types, category: q.category });
+            if (!nq) return;
+            swapCount++; round.qs[qIdx] = nq; usedIds.add(nq.id); swapping = true; showQ();
+          }, swapCount));
           if (round.perQ) {
             const lim = (q.type === 'order' || q.type === 'match') ? Math.max(round.perQ, 60) : q.type === 'fill' ? Math.max(round.perQ, 30) : round.perQ;
             perT = Timer()(lim, left => { tb.set(left, left / lim); if (left < 4 && Math.ceil(left) !== Math.ceil(left + 0.1)) Sound.tick(); }, () => { ctrl.lock && ctrl.lock(); onAnswer(round, q, { correct: false, timeout: true }, lim, tb); }).start();
           }
         };
-        if (round.wheel && !fast()) spin()(stage, q, go); else go();
+        if (round.wheel && !fast() && !swapping) spin()(stage, q, go); else go();
+        swapping = false;
       }
 
       function onAnswer(round, q, res, secs, tb) {
         if (!cur || cur.answered || ended) return; cur.answered = true;
         if (perT) { perT.stop(); perT = null; }
+        W.QP.Swap.hide(wrap);
         if (cur.ctrl && cur.ctrl.cleanup) cur.ctrl.cleanup();
         const p = players[turn];
         let pts = 0, mult = (res.mult || 1) * (round.scoreMult || 1);

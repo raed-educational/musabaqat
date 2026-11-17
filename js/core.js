@@ -140,6 +140,58 @@
   const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
   function download(name, text, mime) { const a = h('a', { href: URL.createObjectURL(new Blob([text], { type: mime || 'application/json' })), download: name }); document.body.appendChild(a); a.click(); a.remove(); }
 
-  W.QP = { LS, Bank, Player, Board, Sound, h, esc, toAr, shuffle, mulberry32, hashStr, norm, fillMatches, todayKey, download, DIFF: { 1: 'سهل', 2: 'متوسط', 3: 'صعب' },
+  // ---------- "تغيير السؤال": replace a hard question with a very easy one (no score penalty)
+  const Swap = {
+    pick(spec) {
+      spec = spec || {};
+      const used = spec.used || new Set();
+      const cur = spec.current || null;
+      const curId = cur && cur.id;
+      const pool = spec.pool || Bank.all();
+      const types = spec.types || (cur && cur.type ? [cur.type] : null);
+      const preferType = cur && cur.type;
+      const cat = spec.category || (cur && cur.category);
+      const cats = spec.cats;
+      const book = spec.book || (cur && cur.book);
+      const ok = q => {
+        if (!q || q.id === curId || used.has(q.id)) return false;
+        if (spec.test && !spec.test(q)) return false;
+        return true;
+      };
+      const typ = q => !types || types.includes(q.type);
+      const sameT = q => !preferType || q.type === preferType;
+      const layers = [
+        q => ok(q) && sameT(q) && typ(q) && +q.difficulty === 1 && q.curated === 'school' && cat && q.category === cat,
+        q => ok(q) && sameT(q) && typ(q) && +q.difficulty === 1 && q.curated === 'school' && (!cats || cats.includes(q.category)),
+        q => ok(q) && sameT(q) && typ(q) && +q.difficulty === 1 && q.curated === 'school',
+        q => ok(q) && sameT(q) && typ(q) && +q.difficulty === 1 && book && q.book === book,
+        q => ok(q) && sameT(q) && typ(q) && +q.difficulty === 1 && cat && q.category === cat,
+        q => ok(q) && sameT(q) && typ(q) && +q.difficulty === 1 && (!cats || cats.includes(q.category)),
+        q => ok(q) && sameT(q) && typ(q) && +q.difficulty === 1,
+        q => ok(q) && typ(q) && +q.difficulty === 1,
+        q => ok(q) && sameT(q) && typ(q) && +q.difficulty === 2,
+        q => ok(q) && typ(q)
+      ];
+      for (const L of layers) {
+        const list = pool.filter(L);
+        if (list.length) {
+          const q = list[Math.floor(Math.random() * list.length)];
+          used.add(q.id);
+          return q;
+        }
+      }
+      return null;
+    },
+    button(onClick, count) {
+      const n = count || 0;
+      return h('button', { type: 'button', class: 'btn swap-btn', id: 'swapQ', onclick: ev => { ev.preventDefault(); ev.stopPropagation(); onClick && onClick(); } },
+        '🔄 تغيير السؤال',
+        n ? h('small', { class: 'swap-count' }, 'استُخدم ' + toAr(n) + (n === 1 ? ' مرة' : ' مرات')) : h('small', { class: 'swap-hint' }, 'إذا صعب السؤال… يأتي بعده سؤال سهل جدًا'));
+    },
+    bar(onClick, count) { return h('div', { class: 'swap-bar' }, this.button(onClick, count)); },
+    hide(root) { (root || document).querySelectorAll('.swap-bar').forEach(el => el.remove()); }
+  };
+
+  W.QP = { LS, Bank, Player, Board, Sound, h, esc, toAr, shuffle, mulberry32, hashStr, norm, fillMatches, todayKey, download, Swap, DIFF: { 1: 'سهل', 2: 'متوسط', 3: 'صعب' },
     TYPES: { mcq: 'اختيار من متعدد', tf: 'صح أم خطأ', fill: 'أكمل الفراغ', order: 'ترتيب', match: 'توصيل', who: 'من أنا؟' } };
 })(window);

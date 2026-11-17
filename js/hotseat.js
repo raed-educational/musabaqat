@@ -39,20 +39,36 @@
         wrap.appendChild(h('div', { class: 'hs-top' }, h('div', { class: 'hs-seat' }, '🔥 ', h('b', { style: 'color:' + K().COLORS[turn] }, t.name)), big, mult, stat));
         wrap.appendChild(tb.el);
         const area = h('div', { class: 'hs-area' }); wrap.appendChild(area);
+        let swapCount = 0;
         const pass = h('button', { class: 'btn ghost big', id: 'hsPass', onclick: () => { if (!locked && !over) { Sound.tick && Sound.tick(); log.push({ q: cur, res: { correct: false, skipped: true }, pts: 0, player: t.name }); streak = 0; nextQ(); } } }, '⏭ تمرير');
-        wrap.appendChild(h('div', { class: 'kit-ctrl' }, pass));
+        const swapHost = h('div', { class: 'swap-host' });
+        wrap.appendChild(h('div', { class: 'kit-ctrl' }, pass, swapHost));
         const m = () => streak >= 6 ? 3 : streak >= 3 ? 2 : 1;
         const paint = () => { mult.textContent = '×' + toAr(m()) + (streak ? ' — سلسلة ' + toAr(streak) : ''); mult.className = 'hs-mult x' + m(); stat.textContent = '✔ ' + toAr(ok) + ' / ' + toAr(n) + ' — ' + K().fmt(pts); };
-        function nextQ() {
+        function paintSwap() {
+          swapHost.innerHTML = '';
           if (over) return;
-          locked = false; cur = P.next(n < 4 ? [1, 2] : [1, 2, 3]); n++;
+          swapHost.appendChild(W.QP.Swap.bar(() => {
+            if (locked || over) return;
+            const nq = W.QP.Swap.pick({ used: P.used, current: cur, types: ['mcq'], cats: cfg.cats, category: cur && cur.category, test: x => K().MCQ(x) && x.question.length <= 160 });
+            if (!nq) return; swapCount++; cur = nq; locked = false; renderQ();
+          }, swapCount));
+        }
+        function renderQ() {
+          if (over) return;
           const M = K().mcq(cur, i => pick(i, M));
           area.innerHTML = ''; area.appendChild(M.el); wrap.__q = cur;
           keyH = e => { const k = '1234'.indexOf(e.key); if (k >= 0 && M.btns[k]) M.btns[k].click(); };
-          paint();
+          paint(); paintSwap();
+        }
+        function nextQ() {
+          if (over) return;
+          locked = false; cur = P.next(n < 4 ? [1, 2] : [1, 2, 3]); n++;
+          renderQ();
         }
         function pick(i, M) {
           if (locked || over) return; locked = true; M.lock(); M.show(i);
+          W.QP.Swap.hide(swapHost);
           const good = i === cur.answer;
           if (good) { const g = 100 * m(); streak++; ok++; pts += g; t.score += g; t.correct++; t.best = Math.max(t.best, streak); Sound.good(); }
           else { streak = 0; Sound.bad(); }

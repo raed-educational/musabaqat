@@ -24,7 +24,7 @@
       const dep = K().OPT_DEP;
       const P = K().picker({ cats: cfg.cats, types: ['mcq', 'tf'], filters: cfg.filters, test: q => q.type === 'tf' ? q.options && q.options.length === 2 : K().MCQ(q) && !dep.test(q.question) && !q.options.some(o => /ما سبق|جميع ما|كلاهما|لا شيء|كل ما/.test(o)) });
       const players = cfg.names.map(name => ({ name, score: 0, correct: 0, lives, out: false, rounds: 0 }));
-      const log = []; let turn = 0, round = 1, outOrder = 0;
+      const log = []; let turn = 0, round = 1, outOrder = 0, swapCount = 0, forcedQ = null;
       const solo = players.length === 1;
       const alive = () => players.filter(p => !p.out);
       const secs = () => speed ? Math.max(5, 13 - round) : 15;
@@ -40,7 +40,8 @@
         if (ended) return;
         if (timer) timer.stop();
         const p = players[turn];
-        const q = P.next(round <= 2 ? 1 : round <= 4 ? [1, 2] : round <= 6 ? 2 : [2, 3]);
+        const q = forcedQ || P.next(round <= 2 ? 1 : round <= 4 ? [1, 2] : round <= 6 ? 2 : [2, 3]);
+        forcedQ = null;
         const s = statement(q);
         wrap.innerHTML = ''; W.scrollTo(0, 0);
         wrap.appendChild(K().scores(players, turn, { val: p2 => K().fmt(p2.score), sub: hearts }));
@@ -55,12 +56,18 @@
         const bT = h('button', { class: 'el-btn t', id: 'elTrue', onclick: () => answer(true) }, '✔', h('span', null, 'صح'));
         const bF = h('button', { class: 'el-btn f', id: 'elFalse', onclick: () => answer(false) }, '✘', h('span', null, 'خطأ'));
         wrap.appendChild(tb.el); wrap.appendChild(card); wrap.appendChild(h('div', { class: 'el-btns' }, bT, bF)); wrap.appendChild(msg); wrap.appendChild(ctrl);
+        wrap.appendChild(W.QP.Swap.bar(() => {
+          if (done || ended) return; if (timer) timer.stop();
+          const nq = W.QP.Swap.pick({ used: P.used, current: q, types: ['mcq', 'tf'], cats: cfg.cats, category: q.category, test: x => x.type === 'tf' ? x.options && x.options.length === 2 : K().MCQ(x) && !dep.test(x.question) && !x.options.some(o => /ما سبق|جميع ما|كلاهما|لا شيء|كل ما/.test(o)) });
+          if (!nq) return; swapCount++; forcedQ = nq; play();
+        }, swapCount));
         wrap.__q = s;
         let done = false;
         timer = K().timer(secs(), tb, () => answer(null));
         keyH = e => { if (done) return; if (e.key === 'ArrowRight' || e.key === '1') answer(true); else if (e.key === 'ArrowLeft' || e.key === '2') answer(false); };
         function answer(v) {
           if (done) return; done = true; timer.stop(); bT.disabled = bF.disabled = true;
+          W.QP.Swap.hide(wrap);
           const ok = v === s.truth; p.rounds++;
           (s.truth ? bT : bF).classList.add('right'); if (v != null && !ok) (v ? bT : bF).classList.add('wrong');
           if (ok) { p.correct++; p.score += 100 * (+q.difficulty || 1); Sound.good(); }

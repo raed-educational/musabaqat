@@ -174,6 +174,8 @@
     if (!qs.length) { root.appendChild(h('p', null, 'لا توجد أسئلة كافية لهذه اللعبة بالخيارات الحالية.')); return; }
     if (qs.filterNote) root.appendChild(h('div', { class: 'filter-note' }, qs.filterNote));
     const st = { i: 0, score: 0, correct: 0, wrong: 0, streak: 0, best: 0, lives: r.lives || 0, log: [], start: Date.now(), life: { fifty: 1, skip: 1, time: 1 } };
+    const usedIds = new Set(qs.map(q => q && q.id).filter(Boolean));
+    let swapCount = 0, swapping = false;
     const hud = h('div', { class: 'hud' }); const tb = timerBar(); const stage = h('div', { class: 'stage' });
     const lifeBar = h('div', { class: 'lifelines' });
     root.appendChild(hud); root.appendChild(tb.el); root.appendChild(lifeBar); root.appendChild(stage);
@@ -204,12 +206,20 @@
         cur = { q, answered: false };
         const { card, ctrl } = questionCard(q, res => onAnswer(q, res, (Date.now() - t0) / 1000), { rnd, perQ: r.perQ, hints: r.hints });
         cur.ctrl = ctrl; stage.appendChild(card); drawLifelines(q);
+        stage.appendChild(W.QP.Swap.bar(() => {
+          if (!cur || cur.answered || ended) return;
+          stopQ();
+          const nq = W.QP.Swap.pick({ used: usedIds, current: q, types: (game.filter && game.filter.types) || null, cats: (game.filter && game.filter.cats) || null, category: q.category, book: (game.filter && game.filter.book) || q.book });
+          if (!nq) return;
+          swapCount++; qs[st.i] = nq; usedIds.add(nq.id); swapping = true; show();
+        }, swapCount));
         if (r.perQ && !r.totalTime) { const lim = q.type === 'order' || q.type === 'match' ? Math.max(r.perQ, 60) : q.type === 'fill' ? Math.max(r.perQ, 30) : r.perQ; perT = Timer(lim, left => { tb.set(left, left / lim); if (left < 4 && Math.ceil(left) !== Math.ceil(left + .1)) Sound.tick(); }, () => { ctrl.lock && ctrl.lock(); onAnswer(q, { correct: false, timeout: true }, lim); }).start(); }
       };
-      if (r.wheel) spinWheel(stage, q, go); else go();
+      if (r.wheel && !swapping) spinWheel(stage, q, go); else go();
+      swapping = false;
     }
     function onAnswer(q, res, secs) {
-      if (!cur || cur.answered) return; cur.answered = true; stopQ(); drawLifelines(q);
+      if (!cur || cur.answered) return; cur.answered = true; stopQ(); W.QP.Swap.hide(stage); drawLifelines(q);
       let pts = 0;
       if (res.correct || res.partial) {
         const base = 100 * (q.difficulty || 1) * (res.correct ? 1 : res.partial * 0.6);
@@ -265,9 +275,11 @@
       L('fifty', '½ حذف إجابتين', () => ctrl.fifty());
       L('audience', '👥 رأي الجمهور', () => { const live = ctrl.buttons.filter(b => !b.disabled); let rest = 100; const good = 45 + Math.floor(Math.random() * 30); const vals = live.map(b => { const i = +b.dataset.i; return i === q.answer ? good : 0; }); rest -= good; live.forEach((b, k) => { if (!vals[k]) { const v = k === live.length - 1 ? rest : Math.floor(Math.random() * rest); vals[k] = v; rest -= v; } }); if (rest > 0) vals[vals.findIndex(v => v === good)] += rest; live.forEach((b, k) => b.appendChild(h('span', { class: 'aud' }, toAr(vals[k]) + '٪'))); });
       L('friend', '📞 اتصل بصديق', () => { const sure = Math.random() < 0.8; const live = ctrl.buttons.filter(b => !b.disabled); const pickB = sure ? live.find(b => +b.dataset.i === q.answer) : live[Math.floor(Math.random() * live.length)]; card.appendChild(h('div', { class: 'hint' }, '📞 صديقك يقول: «أظن أن الإجابة هي: ' + q.options[+pickB.dataset.i] + '»' + (sure ? '' : ' (غير متأكد)'))); });
-      L('swap', '🔄 تبديل السؤال', () => { const nq = take(q.difficulty); if (nq) { qs[st.i] = nq; if (perT) perT.stop(); show(); } });
+      L('swap', '🔄 تبديل السؤال', () => { const nq = W.QP.Swap.pick({ used, current: q, types: ['mcq'], category: q.category, test: x => x.options && x.options.length === 4 }); if (nq) { qs[st.i] = nq; if (perT) perT.stop(); st.life.swap++; show(); } });
       main.appendChild(h('div', { class: 'row between' }, h('div', { class: 'prize' }, 'سؤال ' + toAr(st.i + 1) + ' بقيمة ', h('b', null, toAr(PRIZES[st.i].toLocaleString('en')))), h('button', { class: 'btn ghost small', onclick: () => end('walk') }, '🚪 انسحب بجائزتك')));
       main.appendChild(tb.el); main.appendChild(lifes); main.appendChild(card);
+      if (!st._swapN) st._swapN = 0;
+      main.appendChild(W.QP.Swap.bar(() => { const nq = W.QP.Swap.pick({ used, current: q, types: ['mcq'], category: q.category, test: x => x.options && x.options.length === 4 }); if (nq) { qs[st.i] = nq; if (perT) perT.stop(); st._swapN++; show(); } }, st._swapN));
       const lim = st.i < 5 ? 30 : st.i < 10 ? 45 : 60;
       perT = Timer(lim, left => tb.set(left, left / lim), () => { ctrl.lock(); answered(q, { correct: false, timeout: true }); }).start();
     }
@@ -296,6 +308,7 @@
     root.appendChild(playersForm(2, [Player.name || 'اللاعب الأول', 'اللاعب الثاني'], names => {
       root.innerHTML = '';
       const qs = gameQuestions(game, opts, r.rounds * 2); const P = names.map(n => ({ name: n, score: 0, correct: 0 }));
+      const usedIds = new Set(qs.map(q => q && q.id).filter(Boolean)); let swapCount = 0;
       const board = h('div', { class: 'duel-board' }); const tb = timerBar(); const stage = h('div', { class: 'stage' });
       if (qs.filterNote) root.appendChild(h('div', { class: 'filter-note' }, qs.filterNote));
       root.appendChild(board); root.appendChild(tb.el); root.appendChild(stage);
@@ -307,8 +320,13 @@
         stage.appendChild(h('div', { class: 'turn-banner' }, 'دور: ' + p.name + ' — الجولة ' + toAr(Math.floor(i / 2) + 1) + ' من ' + toAr(Math.ceil(qs.length / 2))));
         let answered = false;
         const { card, ctrl } = questionCard(q, res => onA(res), { rnd: Math.random, perQ: r.perQ }); stage.appendChild(card);
+        stage.appendChild(W.QP.Swap.bar(() => {
+          if (answered || done) return; if (perT) perT.stop();
+          const nq = W.QP.Swap.pick({ used: usedIds, current: q, types: (game.filter && game.filter.types) || null, cats: (game.filter && game.filter.cats) || null, category: q.category });
+          if (!nq) return; swapCount++; qs[i] = nq; usedIds.add(nq.id); show();
+        }, swapCount));
         perT = Timer(r.perQ, left => tb.set(left, left / r.perQ), () => { ctrl.lock && ctrl.lock(); onA({ correct: false, timeout: true }); }).start();
-        function onA(res) { if (answered) return; answered = true; perT.stop(); const pts = res.correct ? 100 * (q.difficulty || 1) * (1 + 0.5 * perT.frac) : 0; p.score += pts; if (res.correct) { p.correct++; Sound.good(); } else Sound.bad(); log.push({ q, res, pts, player: p.name }); drawBoard();
+        function onA(res) { if (answered) return; answered = true; perT.stop(); W.QP.Swap.hide(stage); const pts = res.correct ? 100 * (q.difficulty || 1) * (1 + 0.5 * perT.frac) : 0; p.score += pts; if (res.correct) { p.correct++; Sound.good(); } else Sound.bad(); log.push({ q, res, pts, player: p.name }); drawBoard();
           card.appendChild(feedback(q, res, h('div', { class: 'row end' }, h('button', { class: 'btn primary', onclick: () => { i++; show(); } }, 'التالي ←')))); }
       }
       function end() { if (done) return; done = true; finish({ game, opts, multi: P, st: { score: Math.max(...P.map(p => p.score)), correct: P[0].correct + P[1].correct, wrong: log.length - P[0].correct - P[1].correct, log } }); }
@@ -324,6 +342,7 @@
     root.appendChild(playersForm(2, [Player.name || 'اللاعب الأول', 'اللاعب الثاني'], names => {
       root.innerHTML = '';
       const qs = gameQuestions(game, opts, r.rounds).filter(q => q.type === 'mcq' || q.type === 'tf'); const P = names.map(n => ({ name: n, score: 0, correct: 0 }));
+      const usedIds = new Set(qs.map(q => q && q.id).filter(Boolean)); let swapCount = 0;
       const board = h('div', { class: 'duel-board' }); const tb = timerBar(); const stage = h('div', { class: 'stage' });
       if (qs.filterNote) root.appendChild(h('div', { class: 'filter-note' }, qs.filterNote));
       root.appendChild(board); root.appendChild(tb.el); root.appendChild(stage);
@@ -339,6 +358,11 @@
         const qc = questionCard(q, res => onA(res), { rnd: Math.random }); ctrl = qc.ctrl; card = qc.card; stage.appendChild(card);
         ctrl.buttons.forEach(b => b.disabled = true);
         stage.appendChild(h('p', { class: 'muted center' }, 'اضغط الجرس للإجابة: اللاعب الأول مفتاح A، والثاني مفتاح L، أو الأزرار على الشاشة.'));
+        stage.appendChild(W.QP.Swap.bar(() => {
+          if (done) return; if (perT) perT.stop();
+          const nq = W.QP.Swap.pick({ used: usedIds, current: q, types: ['mcq', 'tf'], cats: (game.filter && game.filter.cats) || null, category: q.category });
+          if (!nq) return; swapCount++; qs[i] = nq; usedIds.add(nq.id); show();
+        }, swapCount));
         perT = Timer(r.perQ, left => tb.set(left, left / r.perQ), () => { ctrl.lock(); onA({ correct: false, timeout: true }); }).start();
       }
       function buzz(k) { if (buzzed != null || locked[k] || !ctrl || done) return; buzzed = k; Sound.beep(k ? 500 : 700, .2); drawBoard(); ctrl.buttons.forEach(b => { if (!b.classList.contains('gone')) b.disabled = false; }); }
@@ -352,7 +376,7 @@
         if (!locked[other]) { buzzed = null; drawBoard(); const fresh = questionCard(q, rr => onA(rr), { rnd: Math.random }); stage.replaceChild(fresh.card, card); card = fresh.card; ctrl = fresh.ctrl; ctrl.buttons.forEach(b => { b.disabled = true; if (b.textContent.includes(res.given)) { b.classList.add('gone'); } }); stage.appendChild(h('p', { class: 'hint center' }, 'إجابة خاطئة! الفرصة الآن لـ ' + P[other].name)); }
         else { perT.stop(); log.push({ q, res, pts: 0 }); after(res); }
       }
-      function after(res) { ctrl.lock && ctrl.lock(); card.appendChild(feedback(qs[i], res, h('div', { class: 'row end' }, h('button', { class: 'btn primary', onclick: () => { i++; show(); } }, 'التالي ←')))); }
+      function after(res) { ctrl.lock && ctrl.lock(); W.QP.Swap.hide(stage); card.appendChild(feedback(qs[i], res, h('div', { class: 'row end' }, h('button', { class: 'btn primary', onclick: () => { i++; show(); } }, 'التالي ←')))); }
       function end() { if (done) return; done = true; document.removeEventListener('keydown', keyH); finish({ game, opts, multi: P, st: { score: Math.max(...P.map(p => p.score)), correct: P[0].correct + P[1].correct, wrong: log.length - P[0].correct - P[1].correct, log } }); }
       show();
     }));
@@ -376,6 +400,7 @@
     function start() {
       const T = [...names.querySelectorAll('input')].map((x, k) => ({ name: x.value.trim() || defaults[k], score: 0, correct: 0 }));
       const qs = gameQuestions(game, opts, +roundsSel.value); const lim = +timeSel.value;
+      const usedIds = new Set(qs.map(q => q && q.id).filter(Boolean)); let swapCount = 0;
       const tNote = qs.filterNote;
       root.innerHTML = ''; root.classList.add('host');
       if (tNote) root.appendChild(h('div', { class: 'filter-note' }, tNote));
@@ -392,8 +417,13 @@
         const { card, ctrl } = questionCard(q, () => {}, { rnd: Math.random, perQ: lim }); stage.appendChild(card);
         const award = h('div', { class: 'award' });
         let revealed = false;
+        stage.appendChild(W.QP.Swap.bar(() => {
+          if (revealed || done) return; if (perT) perT.stop();
+          const nq = W.QP.Swap.pick({ used: usedIds, current: q, types: (game.filter && game.filter.types) || null, cats: (game.filter && game.filter.cats) || null, category: q.category });
+          if (!nq) return; swapCount++; qs[i] = nq; usedIds.add(nq.id); show();
+        }, swapCount));
         function reveal(timeout) {
-          if (revealed) return; revealed = true; perT.stop(); ctrl.lock && ctrl.lock();
+          if (revealed) return; revealed = true; perT.stop(); ctrl.lock && ctrl.lock(); W.QP.Swap.hide(stage);
           card.appendChild(feedback(q, { correct: true }, null)); card.querySelector('.fb-title').textContent = '📢 الإجابة: ' + answerText(q);
           award.innerHTML = ''; award.appendChild(h('div', { class: 'muted' }, 'من أجاب إجابة صحيحة؟'));
           T.forEach((t, k) => award.appendChild(h('button', { class: 'btn ' + (k === turn ? 'primary' : 'ghost'), onclick: () => { const v = k === turn ? pts * 10 : pts * 5; t.score += v; t.correct++; Sound.good(); log.push({ q, res: { correct: true }, pts: v, player: t.name }); nextQ(); } }, t.name + (k === turn ? ' (+' + toAr(pts * 10) + ')' : ' سرقة (+' + toAr(pts * 5) + ')'))));

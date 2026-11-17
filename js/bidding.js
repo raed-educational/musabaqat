@@ -22,7 +22,7 @@
     function begin(cfg) {
       const P = K().picker({ cats: cfg.cats, types: ['mcq'], filters: cfg.filters, test: K().MCQ });
       const teams = cfg.names.map(name => ({ name, score: start, correct: 0 }));
-      const log = []; let r = 0;
+      const log = []; let r = 0, swapCount = 0;
       const catDeck = []; const nextCat = () => { if (!catDeck.length) catDeck.push(...shuffle(cfg.cats)); return catDeck.shift(); };
       function round() {
         if (ended) return;
@@ -56,8 +56,8 @@
         wrap.appendChild(cards);
         wrap.appendChild(h('div', { class: 'row center' }, h('button', { class: 'btn primary big', id: 'bdReveal', onclick: () => { if (secret && !lockd.every(Boolean)) { alert('كل فريق لازم يخفي مزايدته أولًا'); return; } question(cat, d, bids.slice(), final); } }, secret ? '🔓 اكشف المزايدات والسؤال' : '❓ اعرض السؤال')));
       }
-      function question(cat, d, bids, final) {
-        const q = P.next(d, cat);
+      function question(cat, d, bids, final, forced) {
+        const q = forced || P.next(d, cat);
         wrap.innerHTML = ''; W.scrollTo(0, 0);
         wrap.appendChild(K().scores(teams, -1, { sub: (p) => 'المزايدة: ' + K().fmt(bids[teams.indexOf(p)]) }));
         const M = K().mcq(q, null);
@@ -67,9 +67,16 @@
         const ctrl = h('div', { class: 'kit-ctrl' });
         wrap.appendChild(ctrl);
         let timer = K().timer(final ? 45 : 30, tb, () => {});
+        let revealed = false;
+        wrap.appendChild(W.QP.Swap.bar(() => {
+          if (revealed || ended) return; timer.stop();
+          const nq = W.QP.Swap.pick({ used: P.used, current: q, types: ['mcq'], cats: cfg.cats, category: cat, test: K().MCQ });
+          if (!nq) return; swapCount++; question(cat, d, bids, final, nq);
+        }, swapCount));
         ctrl.appendChild(h('button', { class: 'btn primary big', id: 'bdShow', onclick: reveal }, '📢 إظهار الإجابة'));
         function reveal() {
-          timer.stop(); M.lock(); M.show(null);
+          if (revealed) return; revealed = true; timer.stop(); M.lock(); M.show(null);
+          W.QP.Swap.hide(wrap);
           ctrl.innerHTML = '';
           ctrl.appendChild(h('div', { class: 'kit-msg' }, 'الإجابة: «' + q.options[q.answer] + '» — من جاوب صح؟'));
           const row = h('div', { class: 'bd-marks' });

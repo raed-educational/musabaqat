@@ -49,6 +49,7 @@
       const log = [];
       const fl = cfg.filters || {};
       const used = new Set();
+      let swapCount = 0;
       const okRow = r => cfg.cats.includes(r[1]);
       const rowsFor = L => (W.HUROOF_Q[L] || []);
       const letters = W.QP.HUROOF ? W.QP.HUROOF.LETTERS : Object.keys(W.HUROOF_Q);
@@ -62,6 +63,11 @@
         const layers = [r => okRow(r) && (!fl.diff || r[2] === fl.diff) && (!fl.stage || r[3] === fl.stage) && (!sch || r[9] === 1), r => sch && r[9] === 1, r => okRow(r) && (!fl.diff || r[2] === fl.diff), okRow, () => true];
         for (const f of layers) { const l = rows.filter(r => f(r) && !used.has(r[0])); if (l.length) { const r = l[Math.floor(Math.random() * l.length)]; used.add(r[0]); return { id: r[0], category: r[1], difficulty: r[2], stage: r[3], question: r[4], answer: r[5], accept: [r[5]], type: 'fill', clues: r[6] || null, source: r[7], subcategory: r[8] }; } }
         return null;
+      }
+      function pickEasy(L, current) {
+        const rows = rowsFor(L).concat((W.HUROOF_SCHOOL && W.HUROOF_SCHOOL[L]) || []);
+        const pool = rows.map(r => ({ id: r[0], category: r[1], difficulty: r[2], stage: r[3], question: r[4], answer: r[5], accept: [r[5]], type: 'fill', clues: r[6] || null, source: r[7], subcategory: r[8], curated: r[9] === 1 ? 'school' : undefined }));
+        return W.QP.Swap.pick({ pool, used, current, cats: cfg.cats, category: current && current.category });
       }
       function stopTimer() { if (timer) { timer.stop(); timer = null; } }
       function setKeys(fn) { if (keyH) W.removeEventListener('keydown', keyH); keyH = fn; if (fn) W.addEventListener('keydown', fn); }
@@ -90,9 +96,9 @@
         let over = false;
         timer = K().timer(race, tb, () => { over = true; Sound.bad(); afterRace(); });
         function afterRace() { stopTimer(); setKeys(null); if (fillOn) fillRound(L); else nextRound(); }
-        function nextQ() {
+        function nextQ(forced) {
           if (over || ended) return;
-          const q = pick(L); if (!q) return afterRace();
+          const q = forced || pick(L); if (!q) return afterRace();
           const c = Bank.cat(q.category) || {};
           stage.innerHTML = '';
           stage.appendChild(h('div', { class: 'q-meta' }, h('span', { class: 'tag light' }, (c.icon || '') + ' ' + (c.name || ''))));
@@ -101,6 +107,11 @@
           const status = h('div', { class: 'kit-msg' }, '🔔 أسرع فريق!');
           const ctrl = h('div', { class: 'kit-ctrl' });
           stage.appendChild(status); stage.appendChild(ctrl);
+          stage.appendChild(W.QP.Swap.bar(() => {
+            if (over || ended) return;
+            const nq = pickEasy(L, q);
+            if (!nq) return; swapCount++; nextQ(nq);
+          }, swapCount));
           const locked = teams.map(() => false); let buzzed = null;
           function draw() {
             ctrl.innerHTML = '';

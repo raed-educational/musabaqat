@@ -32,17 +32,20 @@
       const P = K().picker(spec);
       const st = { i: 0, score: 0, correct: 0, wrong: 0, best: 0, log: [], start: Date.now() };
       const life = { fifty: true, call: true, aud: true };
-      let level = 0, banked = 0;
+      let level = 0, banked = 0, swapCount = 0;
 
       function ladder() {
         return h('ol', { class: 'mm-ladder' }, PRIZES.map((p, i) => i).reverse().map(i => h('li', { class: (i === level ? 'cur ' : '') + (i < level ? 'done ' : '') + (SAFE.includes(i) ? 'safe' : '') },
           h('span', { class: 'mm-n' }, toAr(i + 1)), h('span', { class: 'mm-diamond' }, i < level ? '◆' : ''), h('b', null, money(PRIZES[i])))));
       }
 
+      let forcedQ = null;
+      function showForced(q) { forcedQ = q; show(); }
       function show() {
         if (ended) return;
         clear();
-        const q = P.next(diffFor(level));
+        const q = forcedQ || P.next(diffFor(level));
+        forcedQ = null;
         if (!q) return end('lost');
         wrap.innerHTML = ''; W.scrollTo(0, 0);
         const note = P.note();
@@ -67,6 +70,12 @@
           h('div', { class: 'mm-qbox' }, q.question),
           h('div', { class: 'mm-opts' }, optEls),
           final, extra);
+        main.appendChild(W.QP.Swap.bar(() => {
+          if (locked || ended) return;
+          const nq = W.QP.Swap.pick({ used: P.used, current: q, types: ['mcq'], cats: cats, category: q.category, test: x => x.options && x.options.length === 4 && !/^(صح|خطأ)$/.test(x.options[0]) });
+          if (!nq) return;
+          swapCount++; clear(); showForced(nq);
+        }, swapCount));
         wrap.appendChild(h('div', { class: 'mm-stage' }, main, ladder()));
         if (secs) timer = K().timer(secs, tb, () => { if (!locked) { locked = true; reveal(null, true); } }); else tb.el.classList.add('hidden');
 
@@ -83,6 +92,7 @@
         function lock() {
           if (locked || chosen == null) return; locked = true;
           if (timer) timer.stop();
+          W.QP.Swap.hide(wrap);
           optEls.forEach(b => { b.disabled = true; if (+b.dataset.i === chosen) b.classList.add('locked'); });
           lifeBar.querySelectorAll('button').forEach(b => b.disabled = true);
           W.document.getElementById('mmWalk').disabled = true;
@@ -91,6 +101,7 @@
           tid = K().after(level < 5 ? 1600 : level < 10 ? 2400 : 3200, () => { clearInterval(hb); reveal(chosen); });
         }
         function reveal(i, timeout) {
+          W.QP.Swap.hide(wrap);
           const ok = i === q.answer;
           optEls.forEach(b => { b.disabled = true; const bi = +b.dataset.i; if (bi === q.answer) b.classList.add('right'); else if (bi === i) b.classList.add('wrong'); });
           st.log.push({ q, res: { correct: ok, timeout: !!timeout, given: i != null ? q.options[i] : '' }, pts: ok ? PRIZES[level] : 0 });

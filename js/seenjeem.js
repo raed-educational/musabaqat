@@ -137,7 +137,7 @@
         cols.push({ topic: tp, owner: i, cells });
       }));
       const st = { score: 0, correct: 0, wrong: 0, best: 0, log: [], start: Date.now() };
-      let turn = 0;
+      let turn = 0, swapCount = 0;
       const note = relaxed ? 'تنبيه: بعض الفئات ليس فيها أسئلة كافية بالمستوى/المرحلة المختارة، فاستُكملت من أقرب مستوى.' : null;
 
       function scoreBar() {
@@ -179,7 +179,7 @@
       function openCell(ci, k) {
         const col = cols[ci], cell = col.cells[k];
         if (cell.done) return;
-        const q = cell.q;
+        let q = cell.q;
         const ctx = { hole: null, trap: null, two: false, rest: false, call: false, phase: 'pre', answering: turn };
         wrap.innerHTML = ''; W.scrollTo(0, 0);
         wrap.appendChild(scoreBar());
@@ -225,6 +225,12 @@
           box.appendChild(helpRow);
           ctrlRow = h('div', { class: 'row center sj-ctrl' });
           box.appendChild(ctrlRow);
+          box.appendChild(W.QP.Swap.bar(() => {
+            if (ctx.phase !== 'q' || ended) return;
+            if (timer) { timer.stop(); timer = null; }
+            const nq = W.QP.Swap.pick({ used, current: q, types: TYPES, category: col.topic.cat, test: x => TYPES.includes(x.type) });
+            if (!nq) return; swapCount++; q = nq; cell.q = nq; used.add(nq.id); show();
+          }, swapCount));
           startTurn(ctx.answering, T1, true);
         }
 
@@ -273,6 +279,7 @@
         function reveal() {
           clearTimers();
           ctx.phase = 'a'; helpRow.innerHTML = ''; ctrlRow.innerHTML = '';
+          W.QP.Swap.hide(box);
           box.querySelectorAll('.sj-opts .opt').forEach(o => { if (+o.dataset.i === q.answer) o.classList.add('correct'); });
           const fb = h('div', { class: 'feedback good sj-answer' },
             h('div', { class: 'fb-title' }, '📢 الإجابة: ', h('b', null, R().answerText(q))),

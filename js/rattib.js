@@ -62,7 +62,7 @@
       }
       const qs = []; for (let i = 0; i < count * cfg.names.length && i < 48; i++) qs.push(pick());
       const teams = cfg.names.map(name => ({ name, score: 0, correct: 0 }));
-      const log = []; let i = 0;
+      const log = []; let i = 0, swapCount = 0;
       function show() {
         if (ended) return;
         if (i >= qs.length) return end();
@@ -82,10 +82,16 @@
           h('div', { class: 'q-meta' }, h('span', { class: 'tag light' }, (c.icon || '') + ' ' + (c.name || '')), q.subcategory ? h('span', { class: 'tag light' }, q.subcategory) : null, h('span', { class: 'tag d' + q.difficulty }, ({ 1: 'سهل', 2: 'متوسط', 3: 'صعب' })[q.difficulty])),
           h('h2', { class: 'q-text' }, q.question), tb.el,
           h('div', { class: 'rt-ends' }, h('span', null, '⬆ الأول')), S.el, h('div', { class: 'rt-ends' }, h('span', null, '⬇ الأخير')), msg, ctrl));
+        wrap.appendChild(W.QP.Swap.bar(() => {
+          if (graded || ended) return; if (timer) timer.stop();
+          const nq = W.QP.Swap.pick({ pool: pool, used, current: q, cats: cfg.cats, category: q.category });
+          if (!nq) return; swapCount++; qs[i] = nq; used.add(nq.id); show();
+        }, swapCount));
         timer = K().timer(secs, tb, () => grade(true));
         let graded = false;
         function grade(timeout) {
           if (graded) return; graded = true; if (timer) timer.stop();
+          W.QP.Swap.hide(wrap);
           S.lock();
           const got = S.order(); let right = 0;
           [...S.el.children].forEach((li, k) => { const ok = got[k] === q.items[k]; if (ok) right++; li.classList.add(ok ? 'ok' : 'no'); });

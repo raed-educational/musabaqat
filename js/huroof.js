@@ -60,6 +60,11 @@
     }
     return { q: null, relaxed: true };
   }
+  function pickEasyFor(L, used, cfg, current) {
+    const rows = ((W.HUROOF_Q && W.HUROOF_Q[L]) || []).concat((W.HUROOF_SCHOOL && W.HUROOF_SCHOOL[L]) || []);
+    const pool = rows.map(r => Object.assign(toQ(r, L), { curated: r[9] === 1 ? 'school' : undefined }));
+    return W.QP.Swap.pick({ pool, used, current, cats: cfg.cats, category: current && current.category });
+  }
 
   function run(game, root, opts, finish) {
     let stopped = false, ended = false, timer = null, keyH = null;
@@ -98,7 +103,7 @@
 
     function begin(cfg) {
       const teams = cfg.names.map((name, i) => ({ name, wins: 0, cells: 0, correct: 0, color: COLORS[i] }));
-      const used = new Set();
+      const used = new Set(); let swapCount = 0;
       const st = { score: 0, correct: 0, wrong: 0, best: 0, log: [], start: Date.now() };
       let roundNo = 0, chooser = Math.random() < 0.5 ? 0 : 1, letters = null, owner = null, history = [], relaxedAny = false, firstDraw = true;
 
@@ -164,11 +169,15 @@
 
       function setKeys(fn) { if (keyH) W.removeEventListener('keydown', keyH); keyH = fn; if (fn) W.addEventListener('keydown', fn); }
 
-      function openCell(r, c, again) {
+      function openCell(r, c, again, forced) {
         const L = letters[r][c];
-        const got = pickFor(L, used, cfg);
-        if (got.relaxed) relaxedAny = true;
-        const q = got.q;
+        let q;
+        if (forced) { q = forced; }
+        else {
+          const got = pickFor(L, used, cfg);
+          if (got.relaxed) relaxedAny = true;
+          q = got.q;
+        }
         if (!q) { alert('لا توجد أسئلة لهذا الحرف'); return; }
         wrap.innerHTML = ''; W.scrollTo(0, 0);
         wrap.appendChild(header());
@@ -219,6 +228,7 @@
         function reveal() {
           if (revealed) return; revealed = true; if (timer) { timer.stop(); timer = null; }
           setKeys(null);
+          W.QP.Swap.hide(wrap);
           const fb = h('div', { class: 'feedback good hf-answer' }, h('div', { class: 'fb-title' }, '📢 الإجابة: ', h('b', null, q.answer)), q.source ? h('div', { class: 'source' }, h('b', null, 'المصدر: '), q.source) : null);
           box.insertBefore(fb, status);
           drawCtrl();
@@ -232,6 +242,11 @@
           if (path) return roundWon(i, path);
           drawBoard();
         }
+        box.appendChild(W.QP.Swap.bar(() => {
+          if (revealed || ended) return; if (timer) { timer.stop(); timer = null; }
+          const nq = pickEasyFor(L, used, cfg, q);
+          if (!nq) return; swapCount++; openCell(r, c, true, nq);
+        }, swapCount));
         setKeys(e => { if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; const k = (e.key || '').toLowerCase(); if (k === 'a' || k === 'ش') buzz(0); else if (k === 'l' || k === 'م') buzz(1); });
         startTimer(cfg.secs, () => { Sound.bad(); if (buzzed == null) status.textContent = '⌛ انتهى الوقت — اكشف الإجابة'; });
         drawCtrl();
