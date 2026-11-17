@@ -74,7 +74,7 @@
         h('div', { class: 'player-row' }, h('a', { class: 'pf-mini', href: '#/profile', title: 'ملفي' }, W.QP.Player.avatar ? W.QP.Player.avatar() : '👤'), h('label', null, 'اسم اللاعب'), nameIn),
         h('div', { class: 'row' }, h('a', { class: 'btn primary big', id: 'onlineHome', href: '#/online' }, '📡 مسابقة أونلاين مع أصدقائك'), h('a', { class: 'btn ghost big', href: '#/profile' }, '👤 ملفي وإنجازاتي'), h('a', { class: 'btn ghost big', id: 'globalHome', href: '#/global' }, '🌍 لوحة الصدارة العامة')),
         h('div', { class: 'row' }, h('a', { class: 'btn primary big', href: '#/play/daily' }, '📅 تحدي اليوم'), h('a', { class: 'btn big', href: '#/play/' + encodeURIComponent('wheel-mix-عجلة الأقسام') }, '🎡 عجلة الأقسام'), h('a', { class: 'btn ghost big', href: '#/games' }, '🎮 كل الألعاب'))),
-      h('div', { class: 'hero-art' }, h('img', { class: 'hero-logo', src: 'assets/logo-official.png', alt: 'شعار برنامج رائد' }))));
+      h('div', { class: 'hero-art' }, h('img', { class: 'hero-logo', src: 'assets/logo-wide.png', alt: 'شعار برنامج رائد' }))));
     const grid = h('div', { class: 'cat-grid' });
     function drawCats() {
       const fl = W.QP.getQFilters ? W.QP.getQFilters() : {};
